@@ -2,7 +2,7 @@
 
 # Gent diagram
 
-This React compoenent will allow you to visualize schema and state of your process.
+This React component will allow you to visualize schema and state of your process.
 
 Install:
 

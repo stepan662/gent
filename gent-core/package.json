@@ -1,6 +1,6 @@
 {
   "name": "gent-core",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Library for simple business processes implementation",
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stepan662/gent-core.git"
+    "url": "git+https://github.com/stepan662/gent.git"
   },
   "keywords": [
     "typescript",
@@ -18,7 +18,10 @@
   ],
   "author": "stepan662",
   "license": "MIT",
-  "homepage": "https://github.com/stepan662/gent-core#readme",
+  "bugs": {
+    "url": "https://github.com/stepan662/gent/issues"
+  },
+  "homepage": "https://github.com/stepan662/gent/tree/master/gent-core",
   "files": [
     "lib/**/*"
   ],
