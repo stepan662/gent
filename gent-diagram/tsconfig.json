@@ -1,0 +1,20 @@
+{
+  "include": ["src"],
+  "exclude": ["node_modules", "**/__tests__/*"],
+  "sourceMap": true,
+  "target": "es6",
+  "moduleResolution": "node",
+  "strictNullChecks": false,
+  "allowSyntheticDefaultImports": true,
+  "lib": ["dom", "esnext"],
+  "declaration": true,
+  "declarationMap": true,
+  "baseUrl": ".",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react",
+    "outDir": "lib",
+    "declaration": true
+  }
+}
