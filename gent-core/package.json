@@ -1,6 +1,6 @@
 {
   "name": "gent-core",
-  "version": "0.5.2",
+  "version": "0.5.5",
   "description": "Library for simple business processes implementation",
   "scripts": {
     "build": "tsc",

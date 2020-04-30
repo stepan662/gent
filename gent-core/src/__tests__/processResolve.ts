@@ -1,7 +1,6 @@
 import b from '../NodeBuilder'
 import * as n from '../Node'
 import Process from '../Process'
-import { gentUpdateState } from '../Hooks'
 
 const [start, task] = b.connect(
   // start event
@@ -15,7 +14,8 @@ const [start, task] = b.connect(
     id: 'task',
     name: 'First task',
     resolve: async (data) => {
-      console.log(data)
+      // console.log(data)
+      return data
     },
     readSubtask: n.subtaskRead(() => {
       return 'hello_read_subtask'

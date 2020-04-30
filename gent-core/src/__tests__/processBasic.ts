@@ -14,8 +14,7 @@ const [start, task] = b.connect(
     id: 'task',
     name: 'First task',
     exec: async () => {
-      console.log('Hello my first task')
-      return true
+      // console.log('Hello my first task')
     },
   }),
 )

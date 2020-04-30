@@ -19,10 +19,12 @@ export const workerNamespace = createNamespace('gent_context')
 class Worker {
   process: Process
   modifier: ModifierType
+  debug: boolean
 
-  constructor(process: Process, modifier: ModifierType) {
+  constructor(process: Process, modifier: ModifierType, debug = false) {
     this.process = process
     this.modifier = modifier
+    this.debug = debug
   }
 
   private initContext = (state: ProcessStateType): ProcessContextType => {
@@ -168,7 +170,8 @@ class Worker {
   public async emittNotifier(state: ProcessStateType) {
     const futureEvents = state.events
 
-    if (futureEvents.length) {
+    if (futureEvents.length && state.status !== 'error') {
+      this.debug && console.log(new Date().toISOString(), 'emmit_notifier')
       const deployTime = futureEvents[0].deploy_time
       await this.modifier.addNotifier({
         process_type: this.process.attributes.id,
@@ -188,7 +191,7 @@ class Worker {
 
     const { task, subtask } = this.unwrapEvent(event)
 
-    console.log(new Date().toISOString(), task, subtask, 'start')
+    this.debug && console.log(new Date().toISOString(), task, subtask, 'start')
 
     // update state, so current task and subtask
     ctx.updateContextState(context, {
@@ -249,19 +252,21 @@ class Worker {
       await this.pushProcessState(context, `${task}.${subtask}.error`)
     }
 
-    console.log(new Date().toISOString(), task, subtask, context.state.status)
+    this.debug && console.log(new Date().toISOString(), task, subtask, context.state.status)
 
     return context.state
   }
 
   public async runWhilePossible(processId) {
     let state = await this.modifier.getProcess(processId)
-    while (state.status === 'running') {
+
+    // run first task without checking delay
+    state = await this.runSyncStep(state, false)
+    while (state.status === 'running' && state.events[0]?.deploy_time === null) {
+      // keep running until stopped or event have delay
       state = await this.runSyncStep(state, false)
     }
-    if (state.status !== 'error') {
-      await this.emittNotifier(state)
-    }
+    await this.emittNotifier(state)
     return state
   }
 
@@ -273,10 +278,10 @@ class Worker {
       })
       if (notifier) {
         if (optimized) {
+          await this.runWhilePossible(notifier.process_id)
+        } else {
           const state = await this.modifier.getProcess(notifier.process_id)
           await this.runSyncStep(state)
-        } else {
-          await this.runWhilePossible(notifier.process_id)
         }
       }
     }, interval)
@@ -383,7 +388,7 @@ class Worker {
   private async pushProcessState(context: ProcessContextType, message) {
     const mutation = squashMutations(context.state, context.journal)
     mutation.message = message
-    await this.modifier.updateProcess(context.state)
+    context.state = await this.modifier.updateProcess(context.state)
     await this.modifier.addJournalEntry({ ...mutation, process_id: context.state.id })
     context.journal = []
   }

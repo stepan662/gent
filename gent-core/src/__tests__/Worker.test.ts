@@ -18,7 +18,7 @@ async function runUntilYouCan(worker: Worker) {
 describe('Worker', () => {
   it('is able to go through basic process', async () => {
     const modifier = new LocalModifier()
-    const worker = new Worker(processBasic, modifier)
+    const worker = new Worker(processBasic, modifier, true)
 
     await worker.initProcess({ test: true })
 
