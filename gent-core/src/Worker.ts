@@ -119,7 +119,7 @@ class Worker {
 
     // there are planned events (like timeout)
     // we will need this info to predict if there wasn't a conflict
-    const somethingPlanned = state.events.length > 0
+    const somethingPlanned = state.events.length > 1
 
     // setup context
     let context = this.initContext(state)
@@ -155,7 +155,7 @@ class Worker {
       })
       if (!notifier) {
         // fail if there is no notifier
-        throw new Error('Process in unexpected state')
+        throw new Error('Process in unexpected state (no notifier even though, there shuld be one)')
       }
     }
     await this.pushProcessState(context, `${taskId}.${subtaskId}.${context.state.status}`)
@@ -171,7 +171,7 @@ class Worker {
     const futureEvents = state.events
 
     if (futureEvents.length && state.status !== 'error') {
-      this.debug && console.log(new Date().toISOString(), 'emmit_notifier')
+      this.debug && console.log(new Date().toISOString(), 'emmit_notifier'.padEnd(20))
       const deployTime = futureEvents[0].deploy_time
       await this.modifier.addNotifier({
         process_type: this.process.attributes.id,
@@ -190,8 +190,6 @@ class Worker {
     let context = this.initContext(state)
 
     const { task, subtask } = this.unwrapEvent(event)
-
-    this.debug && console.log(new Date().toISOString(), task, subtask, 'start')
 
     // update state, so current task and subtask
     ctx.updateContextState(context, {
@@ -251,8 +249,6 @@ class Worker {
       })
       await this.pushProcessState(context, `${task}.${subtask}.error`)
     }
-
-    this.debug && console.log(new Date().toISOString(), task, subtask, context.state.status)
 
     return context.state
   }
@@ -388,6 +384,12 @@ class Worker {
   private async pushProcessState(context: ProcessContextType, message) {
     const mutation = squashMutations(context.state, context.journal)
     mutation.message = message
+
+    if (this.debug) {
+      const { task, subtask, status } = context.state
+      this.debug &&
+        console.log(new Date().toISOString(), 'push_state'.padEnd(20), task, subtask, status)
+    }
     context.state = await this.modifier.updateProcess(context.state)
     await this.modifier.addJournalEntry({ ...mutation, process_id: context.state.id })
     context.journal = []

@@ -68,10 +68,10 @@ class Modifier implements ModifierType {
     const { active, ...search } = options
 
     const notifier = this.data.queue.find((n) => {
+      if (active && n.deploy_time > Date.now()) {
+        return false
+      }
       for (const [key, value] of Object.entries(search)) {
-        if (active && n.deploy_time > Date.now()) {
-          return false
-        }
         if (n[key] !== value) {
           return false
         }
