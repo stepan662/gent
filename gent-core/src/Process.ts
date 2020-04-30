@@ -56,7 +56,7 @@ class Process {
 
   getNextConnections(node: NodeType, linkType?: LinkTypeType): Connection[] {
     return this.connections.filter((c) => {
-      return c.from === node._id && c.link_type === linkType
+      return c.from === node._id && (linkType ? c.link_type === linkType : true)
     })
   }
 

@@ -70,6 +70,9 @@ describe('Worker', () => {
     expect(state.status).toBe('waiting')
     expect(state.task).toBe('task')
 
+    const response = await worker.runReadSubtask(state.id, state.task, 'readSubtask', [null])
+    expect(response).toBe('hello_read_subtask')
+
     // expecting timeout event to stay in events array
     expect(state.events.length).toBe(1)
     expect(state.events[0].subtask).toBe('@timeout')

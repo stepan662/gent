@@ -77,9 +77,9 @@ class Worker {
     }
 
     // check if the process is in correct state
-    if (status !== 'waiting' || state.task !== taskId) {
+    if (state.status !== 'waiting' || state.task !== taskId) {
       throw Error(
-        `Cannot resolve '${taskId}.${subtaskId}' when current is ${state.task} and status ${status}`,
+        `Cannot resolve '${taskId}.${subtaskId}' when current is ${state.task} and status ${state.status}`,
       )
     }
 
@@ -380,6 +380,13 @@ class Worker {
       // if pause is defined - pause the process
       return null
     } else if (result.nextTask) {
+      const node = this.process.getNode(currentTaskId)
+      if (!this.process.getNextConnections(node).find((c) => c.to === result.nextTask)) {
+        // there is no connection between these nodes - throw error
+        throw new Error(
+          `Trying to go from '${currentTaskId}' to ${result.nextTask}, but there is no connection`,
+        )
+      }
       // force next task from result - result of exclusive
       return {
         task: result.nextTask,

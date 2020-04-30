@@ -16,6 +16,9 @@ const [start, task] = b.connect(
     resolve: async (data) => {
       console.log(data)
     },
+    readSubtask: n.subtaskRead(() => {
+      return 'hello_read_subtask'
+    }),
   }),
 )
 
