@@ -84,7 +84,7 @@ export const subtaskRead = (func: (data: any) => Promise<any> | any) =>
 export const taskUser = (props: UserTaskInputType): TaskType => {
   const { resolve, ...standardProps } = props
   return {
-    _first: 'resolve',
+    _first: null,
     ...standardProps,
     type: 'task',
     task_type: 'user_task',
