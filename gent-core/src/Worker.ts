@@ -44,6 +44,7 @@ class Worker {
       task_state: null,
       tags: {},
       outputs: {},
+      current_event: null,
       events: [],
     }
 
@@ -195,19 +196,22 @@ class Worker {
   }
 
   public async runSyncStep(state: ProcessStateType, emmitNotifier: boolean = true) {
-    const event = state.events[0]
+    const currentEvent = state.events[0]
 
-    if (!event) {
+    if (!currentEvent) {
       throw new Error(`Events array is empty`)
     }
 
     const context = this.initContext(state)
 
-    const { taskId, subtaskId } = this.unwrapEvent(event)
+    ctx.updateContextState(context, { current_event: currentEvent })
+    ctx.removeCurrentEvent(context)
+
+    const { taskId, subtaskId } = this.unwrapEvent(currentEvent)
 
     const task = this.process.getNode(taskId)
 
-    if (event.subtask === null) {
+    if (currentEvent.subtask === null) {
       // this means, that this is start of the task
 
       // set new task id
@@ -222,9 +226,9 @@ class Worker {
         const timeout = connection.timeout
         ctx.addEvent(context, { task: taskId, subtask: '@timeout', delay: timeout })
       }
-
-      await this.pushProcessState(context, `${taskId}.${subtaskId}.start`)
     }
+
+    await this.pushProcessState(context, `${taskId}.${subtaskId}.start`)
 
     const node = this.process.getNode(taskId)
 
@@ -234,7 +238,7 @@ class Worker {
       switch (node.type) {
         case 'task':
         case 'exclusive':
-          await this.runSyncSubtask(context, event)
+          await this.runSyncSubtask(context, currentEvent)
           break
 
         case 'end':
@@ -249,14 +253,16 @@ class Worker {
 
       if (this.errorFindNext(taskId, error)) {
         // there is error handler
-        await this.handleError(context, event, error)
-        ctx.removeCurrentEvent(context)
+        await this.handleError(context, currentEvent, error)
       } else {
         unhandledError = error
       }
     }
 
     if (!unhandledError) {
+      // cleanup current event
+      ctx.updateContextState(context, { current_event: null })
+
       await this.pushProcessState(context, `${taskId}.${subtaskId}.${context.state.status}`)
       if (emmitNotifier) {
         await this.emittNotifier(context.state)
@@ -305,14 +311,12 @@ class Worker {
     if (next) {
       if (next.finish) {
         // cleanup async events related to this task, when finishing
-        this.cleanupAfterfinished(context, taskId)
+        this.cleanUpAfterTaskFinish(context, taskId)
       }
       ctx.updateContextState(context, {
         status: 'running',
       })
-      if (subtask.type === 'sync') {
-        ctx.removeCurrentEvent(context)
-      }
+
       ctx.addEvent(context, { task: next.task, subtask: next.subtask, delay: next.delay })
     } else {
       // process explicitly paused
@@ -335,7 +339,6 @@ class Worker {
       await this.executeSubtask(context, taskId, subtaskId)
     } else {
       // external subtasks - pause the process and wait for resolution
-      ctx.removeCurrentEvent(context)
       ctx.updateContextState(context, {
         status: 'waiting',
       })
@@ -343,7 +346,6 @@ class Worker {
   }
 
   private async handleEnd(context: ProcessContextType) {
-    ctx.removeCurrentEvent(context)
     ctx.updateContextState(context, { status: 'finished' })
   }
 
@@ -419,14 +421,16 @@ class Worker {
     }
   }
 
-  private cleanupAfterfinished(context: ProcessContextType, taskId: string) {
+  private cleanUpAfterTaskFinish(context: ProcessContextType, taskId: string) {
     // remove process state
     ctx.updateContextState(context, {
       [`task_state`]: null,
     })
     // remove all future events related to this task
     ctx.updateContextState(context, {
-      events: context.state.events.filter((e) => e.task !== taskId),
+      events: context.state.events.filter(
+        (e) => !String(e.subtask).startsWith('@') && e.task !== taskId,
+      ),
     })
   }
 

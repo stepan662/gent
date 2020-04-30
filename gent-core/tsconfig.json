@@ -6,7 +6,7 @@
   "moduleResolution": "node",
   "strictNullChecks": false,
   "allowSyntheticDefaultImports": true,
-  "lib": ["dom", "esnext"],
+  "lib": ["esnext"],
   "declaration": true,
   "declarationMap": true,
   "baseUrl": ".",

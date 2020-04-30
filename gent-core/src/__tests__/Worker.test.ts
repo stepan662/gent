@@ -32,6 +32,7 @@ describe('Worker', () => {
 
     state = await runSyncStep(worker)
 
+    expect(state.events.length).toBe(1)
     expect(state.status).toBe('running')
     expect(state.task).toBe('task')
 

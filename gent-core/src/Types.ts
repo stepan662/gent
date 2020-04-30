@@ -19,6 +19,7 @@ export type ProcessStateType = {
   error?: ProcessErrorType
   tags: ProcessTagsType
   outputs: ProcessTasksType
+  current_event: ProcessEventType
   events: ProcessEventType[]
 }
 
