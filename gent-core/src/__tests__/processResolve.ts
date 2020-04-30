@@ -27,9 +27,9 @@ const end = task.connect(
   }),
 )
 
-task.connect(n.linkTimeout({ timeout: 10 }), end)
+task.connect(n.linkTimeout({ timeout: 10 }), n.end({ id: 'end_timeout' }))
 
-const simpleProcess = new Process(
+export default new Process(
   {
     id: 'process',
     name: 'My first process',
@@ -39,5 +39,3 @@ const simpleProcess = new Process(
   },
   start,
 )
-
-export default simpleProcess

@@ -1,3 +1,5 @@
+import { Subtask } from './Subtask'
+
 export type ProcessContextType = {
   state: ProcessStateType
   journal: JournalMutationType[]
@@ -89,27 +91,24 @@ export type ElementType = {
   type: 'link' | 'start' | 'end' | 'exclusive' | 'task'
 }
 
-export type LinkTypeType = 'exclusive' | 'error' | 'timeout' | undefined
+export type LinkTypeType = 'error' | 'timeout' | undefined
 
 export type LinkType = ElementType & {
   type: 'link'
   link_type?: LinkTypeType
 }
 
-export type ExclusiveLinkType = LinkType & {
-  link_type: 'exclusive'
-}
-
 export type ErrorCheckerInputType = string | string[] | ((e: ProcessErrorType) => boolean)
 
 export type ErrorLinkType = LinkType & {
   link_type: 'error'
-  error: ErrorCheckerInputType
+  error?: ErrorCheckerInputType
 }
 
 export type TimeoutLinkType = LinkType & {
   link_type: 'timeout'
   timeout: number
+  exec: Subtask
 }
 
 export type StartType = ElementType & {
@@ -123,32 +122,17 @@ export type EndType = ElementType & {
 export type ExclusiveType = ElementType & {
   _first?: string
   type: 'exclusive'
-  run: SubtaskType
+  decide: Subtask
 }
 
 export type TaskType = ElementType & {
   _first?: string
   type: 'task'
   task_type: string
-  [subtaskId: string]: SubtaskType | string
+  [subtaskId: string]: Subtask | string
 }
 
 export type NodeType = StartType | EndType | ExclusiveType | TaskType
-
-export type SubtaskType = {
-  func: (input?: any) => Promise<SubtaskResultType> | SubtaskResultType
-  read_only: boolean
-  external: boolean
-  method?: RestMethods
-}
-
-export type RestMethods = 'get' | 'post' | 'put' | 'patch' | 'delete'
-
-export type SubtaskResultType = {
-  output?: any
-  next_task?: string
-  next_subtask?: string
-}
 
 /*
  * Executable process structure

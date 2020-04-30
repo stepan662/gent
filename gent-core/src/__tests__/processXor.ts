@@ -2,32 +2,34 @@ import b from '../NodeBuilder'
 import * as n from '../Node'
 import Process from '../Process'
 
-const [start, task] = b.connect(
+const [start, exclusive] = b.connect(
   // start event
   n.start({
     id: 'start',
     name: 'Start',
   }),
 
-  // task
-  n.taskSystem({
-    id: 'task',
-    name: 'First task',
-    exec: async () => {
-      console.log('Hello my first task')
-    },
+  n.exclusive({
+    id: 'exclusive',
+    decide: () => 'end1',
   }),
 )
 
-task.connect(
+exclusive.connect(
   // end event
   n.end({
-    id: 'end',
-    name: 'End',
+    id: 'end1',
   }),
 )
 
-const simpleProcess = new Process(
+exclusive.connect(
+  // end event
+  n.end({
+    id: 'end2',
+  }),
+)
+
+export default new Process(
   {
     id: 'process',
     name: 'My first process',
@@ -35,5 +37,3 @@ const simpleProcess = new Process(
   },
   start,
 )
-
-export default simpleProcess
