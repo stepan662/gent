@@ -7,29 +7,12 @@ import processXor from './processXor'
 import processError from './processError'
 import processErrorHandled from './processErrorHandled'
 
-async function makeStep(worker: Worker) {
+async function runUntilYouCan(worker: Worker) {
   const notifier = await worker.modifier.getAndDeleteNotifier({
     process_type: worker.process.attributes.id,
     active: true,
   })
-  if (!notifier) {
-    return false
-  }
-  const state = await worker.modifier.getProcess(notifier.process_id)
-  return await worker.runSyncStep(state)
-}
-
-async function runUntilYouCan(worker: Worker) {
-  let state: ProcessStateType
-  while (true) {
-    const result = await makeStep(worker)
-    if (result) {
-      state = result
-    } else {
-      break
-    }
-  }
-  return state
+  return worker.runWhilePossible(notifier.process_id)
 }
 
 describe('Worker', () => {
@@ -133,6 +116,9 @@ describe('Worker', () => {
     ).rejects.toThrow()
 
     state = await runUntilYouCan(worker)
+
+    // check that return value of timeout was set as output
+    expect(state.outputs.task).toBe('hello_timeout_output')
 
     expect(state.status).toBe('finished')
     expect(state.task).toBe('end_timeout')

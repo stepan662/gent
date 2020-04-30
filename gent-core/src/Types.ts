@@ -14,13 +14,15 @@ export type ProcessStateType = {
   type: string
   task: string
   subtask: string
-  status: string
+  status: ProcessStatusType
   task_state: any
   error?: ProcessErrorType
   tags: ProcessTagsType
   outputs: ProcessTasksType
   events: ProcessEventType[]
 }
+
+export type ProcessStatusType = 'running' | 'waiting' | 'error' | 'finished'
 
 export type ProcessTagsType = {
   [key: string]: string

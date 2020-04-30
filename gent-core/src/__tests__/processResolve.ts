@@ -1,6 +1,7 @@
 import b from '../NodeBuilder'
 import * as n from '../Node'
 import Process from '../Process'
+import { gentUpdateState } from '../Hooks'
 
 const [start, task] = b.connect(
   // start event
@@ -30,7 +31,10 @@ const end = task.connect(
   }),
 )
 
-task.connect(n.linkTimeout({ timeout: 10 }), n.end({ id: 'end_timeout' }))
+task.connect(
+  n.linkTimeout({ timeout: 10, exec: () => 'hello_timeout_output' }),
+  n.end({ id: 'end_timeout' }),
+)
 
 export default new Process(
   {

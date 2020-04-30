@@ -6,7 +6,6 @@ import {
   ProcessEventType,
   ProcessContextType,
   ProcessErrorType,
-  TimeoutLinkType,
 } from './Types'
 
 import Process from './Process'
@@ -179,7 +178,7 @@ class Worker {
     }
   }
 
-  public async runSyncStep(state: ProcessStateType) {
+  public async runSyncStep(state: ProcessStateType, emmitNotifier: boolean = true) {
     const event = state.events[0]
     if (!event) {
       return
@@ -238,7 +237,9 @@ class Worker {
       // remove current event, store state and setup notifier
       ctx.removeCurrentEvent(context, event)
       await this.pushProcessState(context, `${task}.${subtask}.${context.state.status}`)
-      await this.emittNotifier(context.state)
+      if (emmitNotifier) {
+        await this.emittNotifier(context.state)
+      }
     } else {
       // stop the process in case of error
       ctx.updateContextState(context, {
@@ -253,15 +254,30 @@ class Worker {
     return context.state
   }
 
-  public poll(interval: number) {
+  public async runWhilePossible(processId) {
+    let state = await this.modifier.getProcess(processId)
+    while (state.status === 'running') {
+      state = await this.runSyncStep(state, false)
+    }
+    if (state.status !== 'error') {
+      await this.emittNotifier(state)
+    }
+    return state
+  }
+
+  public poll(interval: number, optimized: boolean = false) {
     setInterval(async () => {
       const notifier = await this.modifier.getAndDeleteNotifier({
         process_type: this.process.attributes.id,
         active: true,
       })
       if (notifier) {
-        const state = await this.modifier.getProcess(notifier.process_id)
-        await this.runSyncStep(state)
+        if (optimized) {
+          const state = await this.modifier.getProcess(notifier.process_id)
+          await this.runSyncStep(state)
+        } else {
+          await this.runWhilePossible(notifier.process_id)
+        }
       }
     }, interval)
   }
@@ -344,7 +360,7 @@ class Worker {
   }
 
   private async handleEnd(context: ProcessContextType, event: ProcessEventType) {
-    ctx.updateContextState(context, { status: 'finished' })
+    ctx.updateContextState(context, { status: 'finished', events: [] })
   }
 
   private async handleError(
