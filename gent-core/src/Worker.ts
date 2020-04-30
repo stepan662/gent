@@ -35,14 +35,13 @@ class Worker {
 
     const initialState: ProcessStateType = {
       id: null,
+      type: this.process.attributes.id,
+      task: start._id,
+      subtask: null,
+      status: 'running',
+      task_state: null,
       tags: {},
       outputs: {},
-      current: {
-        task: start._id,
-        subtask: null,
-        status: 'running',
-        task_state: null,
-      },
       events: [],
     }
 
@@ -75,12 +74,11 @@ class Worker {
     if (!state) {
       throw Error(`Process ${processId} not found`)
     }
-    const current = state.current
 
     // check if the process is in correct state
-    if (current.status !== 'waiting' || current.task !== taskId) {
+    if (status !== 'waiting' || state.task !== taskId) {
       throw Error(
-        `Cannot resolve '${taskId}.${subtaskId}' when current is ${current.task} and status ${current.status}`,
+        `Cannot resolve '${taskId}.${subtaskId}' when current is ${state.task} and status ${status}`,
       )
     }
 
@@ -109,18 +107,17 @@ class Worker {
     if (!state) {
       throw Error(`Process ${processId} not found`)
     }
-    const current = state.current
 
     // check if the process is in correct state
-    if (current.status !== 'waiting' || current.task !== taskId) {
+    if (state.status !== 'waiting' || state.task !== taskId) {
       throw Error(
-        `Cannot resolve '${taskId}.${subtaskId}' when current is ${current.task} and state ${current.status}`,
+        `Cannot resolve '${taskId}.${subtaskId}' when current is ${state.task} and state ${state.status}`,
       )
     }
 
     // if we resolve task on which the process is stuck on,
     // then we resume the process, otherwise just execute the task
-    const resumeProcess = current.subtask === subtaskId
+    const resumeProcess = state.subtask === subtaskId
 
     // remove notifier, so we postpone timed tasks (if there are any)
     await this.modifier.getAndDeleteNotifier({
@@ -151,10 +148,10 @@ class Worker {
       ctx.addEvent(context, next)
 
       // when success - update process state and emmit notifier
-      ctx.updateContextState(context, { 'current.status': 'running' })
+      ctx.updateContextState(context, { status: 'running' })
     }
 
-    await this.pushProcessState(context, `${taskId}.${subtaskId}.${context.state.current.status}`)
+    await this.pushProcessState(context, `${taskId}.${subtaskId}.${context.state.status}`)
     await this.emittNotifier(context.state)
 
     return {
@@ -218,9 +215,9 @@ class Worker {
     }
 
     // initialize task state if it doesn't exists
-    if (!context.state.current.task_state) {
+    if (!context.state.task_state) {
       ctx.updateContextState(context, {
-        'current.task_state': {},
+        task_state: {},
       })
     }
 
@@ -242,13 +239,13 @@ class Worker {
     } else {
       // external subtasks - pause the process and wait for resolution
       ctx.updateContextState(context, {
-        'current.status': 'waiting',
+        status: 'waiting',
       })
     }
   }
 
   private async handleEnd(context: ProcessContextType, event: ProcessEventType) {
-    ctx.updateContextState(context, { 'current.status': 'finished' })
+    ctx.updateContextState(context, { status: 'finished' })
   }
 
   private async handleError(
@@ -275,13 +272,13 @@ class Worker {
 
     // update state, so current task and subtask
     ctx.updateContextState(context, {
-      'current.task': task,
-      'current.subtask': subtask,
+      task: task,
+      subtask: subtask,
     })
 
-    if (context.state.current.status !== 'running') {
+    if (context.state.status !== 'running') {
       ctx.updateContextState(context, {
-        'current.status': 'running',
+        status: 'running',
       })
     }
 
@@ -319,18 +316,18 @@ class Worker {
     if (!unhandledError) {
       // remove current event, store state and setup notifier
       ctx.removeCurrentEvent(context, event)
-      await this.pushProcessState(context, `${task}.${subtask}.${context.state.current.status}`)
+      await this.pushProcessState(context, `${task}.${subtask}.${context.state.status}`)
       await this.emittNotifier(context.state)
     } else {
       // stop the process in case of error
       ctx.updateContextState(context, {
-        'current.error': unhandledError,
-        'current.status': 'error',
+        error: unhandledError,
+        status: 'error',
       })
       await this.pushProcessState(context, `${task}.${subtask}.error`)
     }
 
-    console.log(new Date().toISOString(), task, subtask, context.state.current.status)
+    console.log(new Date().toISOString(), task, subtask, context.state.status)
 
     return context.state
   }
@@ -388,7 +385,7 @@ class Worker {
   private cleanupAfterTaskFinished(context: ProcessContextType, taskId: string) {
     // remove process state
     ctx.updateContextState(context, {
-      [`current.task_state`]: null,
+      [`task_state`]: null,
     })
     // remove all future events related to this task
     ctx.updateContextState(context, {

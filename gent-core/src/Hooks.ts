@@ -21,11 +21,11 @@ export const _gentGetProcessState = (): ProcessStateType => {
 }
 
 export const gentGetState = (): any => {
-  return _gentGetProcessState().current.task_state
+  return _gentGetProcessState().task_state
 }
 
 export const gentSetState = (data) => {
-  _gentUpdateProcessState({ [`current.task_state`]: data })
+  _gentUpdateProcessState({ [`task_state`]: data })
 }
 
 export const gentGetOutputs = (): { [taskId: string]: any } => {
@@ -34,7 +34,7 @@ export const gentGetOutputs = (): { [taskId: string]: any } => {
 }
 
 export const gentUpdateState = (changes: { [path: string]: any }) => {
-  _gentUpdateProcessState(scopedChanges(`current.task_state`, changes))
+  _gentUpdateProcessState(scopedChanges(`task_state`, changes))
 }
 
 export const gentUpdateTags = (tags: { [key: string]: string }) => {

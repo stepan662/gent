@@ -9,9 +9,14 @@ export type ProcessContextType = {
  */
 export type ProcessStateType = {
   id: string
+  type: string
+  task: string
+  subtask: string
+  status: string
+  task_state: any
+  error?: ProcessErrorType
   tags: ProcessTagsType
   outputs: ProcessTasksType
-  current: ProcessCurrentType
   events: ProcessEventType[]
 }
 
@@ -21,14 +26,6 @@ export type ProcessTagsType = {
 
 export type ProcessTasksType = {
   [id: string]: any
-}
-
-export type ProcessCurrentType = {
-  task: string
-  subtask: string
-  status: string
-  task_state: any
-  error?: ProcessErrorType
 }
 
 export type ProcessEventType = {

@@ -17,15 +17,14 @@ const TimeoutEvent = ({ edge, properties, state }) => {
   const [time, setTime] = useState(Date.now())
 
   const active = useMemo(() => {
-    const current = state?.current
-    if (current?.task === properties.from && current?.subtask === 'timeout') {
+    if (state?.task === properties.from && state?.subtask === 'timeout') {
       return true
     }
     return false
   }, [state, properties])
 
   const event = useMemo(() => {
-    const taskId = state?.current?.task
+    const taskId = state?.task
     if (taskId !== properties.from) {
       return null
     }

@@ -38,9 +38,8 @@ const getNext = (schema, element) => {
 }
 
 const getFillColor = (state, taskId, theme) => {
-  const current = state?.current
-  if (current && current.task === taskId && current.subtask !== 'timeout') {
-    switch (state.current.status) {
+  if (state?.task === taskId && state?.subtask !== 'timeout') {
+    switch (state.status) {
       case 'error':
         return theme.taskErrorBackground
       case 'running':

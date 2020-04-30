@@ -38,8 +38,8 @@ describe('Worker', () => {
 
     const state = await runUntilYouCan(worker)
 
-    expect(state.current.status).toBe('finished')
-    expect(state.current.task).toBe('end')
+    expect(state.status).toBe('finished')
+    expect(state.task).toBe('end')
     expect(state.events.length).toBe(0)
   })
 
@@ -51,36 +51,36 @@ describe('Worker', () => {
 
     let state = await runUntilYouCan(worker)
 
-    expect(state.current.status).toBe('waiting')
-    expect(state.current.task).toBe('task')
+    expect(state.status).toBe('waiting')
+    expect(state.task).toBe('task')
 
     // expecting timeout event to stay in events array
     expect(state.events.length).toBe(1)
 
     state = (
-      await worker.handleExternalTask(state.id, state.current.task, state.current.subtask, [
+      await worker.handleExternalTask(state.id, state.task, state.subtask, [
         'Hello resolved task',
       ])
     ).state
 
-    expect(state.current.status).toBe('running')
-    expect(state.current.task).toBe('task')
+    expect(state.status).toBe('running')
+    expect(state.task).toBe('task')
 
     // it throws error when trying to resolve twice
     expect(
-      worker.handleExternalTask(state.id, state.current.task, state.current.subtask, [
+      worker.handleExternalTask(state.id, state.task, state.subtask, [
         'Hello resolved task',
       ]),
     ).rejects.toThrow()
 
     state = await runUntilYouCan(worker)
 
-    expect(state.current.status).toBe('finished')
-    expect(state.current.task).toBe('end')
+    expect(state.status).toBe('finished')
+    expect(state.task).toBe('end')
     expect(state.events.length).toBe(0)
 
     expect(
-      worker.handleExternalTask(state.id, state.current.task, 'test', ['Hello resolved task']),
+      worker.handleExternalTask(state.id, state.task, 'test', ['Hello resolved task']),
     ).rejects.toThrow()
   })
 })

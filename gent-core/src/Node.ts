@@ -101,7 +101,7 @@ export const endpoint = (
 
 export const baseTask: {} = {
   timeout: subtaskDecideNext(async () => {
-    const currentId = _gentGetProcessState().current.task
+    const currentId = _gentGetProcessState().task
     const currentTask = gentGetProcess().getNode(currentId)
     const connection = gentGetProcess().getNextConnections(currentTask, 'timeout')[0]
     if (!connection?.to) {
@@ -144,7 +144,7 @@ export const exclusive = (props?: ElementInput): ExclusiveType => {
     type: 'exclusive',
     run: subtaskDecideNext(async () => {
       const outputs = gentGetOutputs()
-      const currentId = _gentGetProcessState().current.task
+      const currentId = _gentGetProcessState().task
       const current = gentGetProcess().getNode(currentId)
       const connections = gentGetProcess().getNextConnections(current, 'exclusive')
       for (const connection of connections) {
