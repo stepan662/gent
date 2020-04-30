@@ -22,12 +22,16 @@ class Modifier implements ModifierType {
     resources: [],
   }
 
+  serialize(data) {
+    return JSON.parse(JSON.stringify(data))
+  }
+
   async createProcess(process: ProcessStateType) {
     const id = String(this.data.process.length)
-    const newEntry = {
+    const newEntry = this.serialize({
       ...process,
       id,
-    }
+    })
     this.data.process.push(newEntry)
     return newEntry
   }
@@ -38,7 +42,7 @@ class Modifier implements ModifierType {
 
   async updateProcess(state: ProcessStateType) {
     const index = this.data.process.findIndex((p) => p.id === state.id)
-    this.data.process[index] = state
+    this.data.process[index] = this.serialize(state)
     return this.data.process[index]
   }
 
@@ -48,10 +52,10 @@ class Modifier implements ModifierType {
 
   async addJournalEntry(mutation: JournalMutationType): Promise<JournalMutationType> {
     const id = String(this.data.journal.length)
-    const result = {
+    const result = this.serialize({
       ...mutation,
       id,
-    }
+    })
     this.data.journal.push(result)
     return result
   }
@@ -61,13 +65,13 @@ class Modifier implements ModifierType {
   }
 
   async addNotifier(notifier: ProcessNotifierType) {
-    this.data.queue.push(notifier)
+    this.data.queue.push(this.serialize(notifier))
   }
 
   async getAndDeleteNotifier(options: ProcessNotifierFilterType) {
     const { active, ...search } = options
 
-    const notifier = this.data.queue.find((n) => {
+    const index = this.data.queue.findIndex((n) => {
       if (active && n.deploy_time > Date.now()) {
         return false
       }
@@ -78,10 +82,11 @@ class Modifier implements ModifierType {
       }
       return true
     })
+    const notifier = index !== -1 && this.data.queue[index]
     if (notifier) {
-      this.data.queue = this.data.queue.filter((n) => n !== notifier)
+      this.data.queue = this.data.queue.filter((_, i) => i !== index)
     }
-    return notifier
+    return notifier || null
   }
 }
 
