@@ -170,7 +170,7 @@ class Worker {
   public async emittNotifier(state: ProcessStateType) {
     const futureEvents = state.events
 
-    if (futureEvents.length && state.status !== 'error') {
+    if (futureEvents.length > 0 && state.status !== 'error') {
       this.debug && console.log(new Date().toISOString(), 'emmit_notifier'.padEnd(20))
       const deployTime = futureEvents[0].deploy_time
       await this.modifier.addNotifier({
@@ -236,7 +236,7 @@ class Worker {
 
     if (!unhandledError) {
       // remove current event, store state and setup notifier
-      ctx.removeCurrentEvent(context, event)
+      ctx.removeCurrentEvent(context)
       await this.pushProcessState(context, `${task}.${subtask}.${context.state.status}`)
       if (emmitNotifier) {
         await this.emittNotifier(context.state)

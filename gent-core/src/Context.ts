@@ -25,9 +25,9 @@ export function addEvent(context: ProcessContextType, eventInput: EventInput) {
   })
 }
 
-export function removeCurrentEvent(context: ProcessContextType, event: ProcessEventType) {
+export function removeCurrentEvent(context: ProcessContextType) {
   updateContextState(context, {
-    events: context.state.events.filter((e) => e !== event),
+    events: context.state.events.slice(1),
   })
 }
 
