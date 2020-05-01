@@ -14,9 +14,9 @@ import { squashMutations } from './Journal'
 import { SubtaskResult, Subtask } from './Subtask'
 
 // setup session so it's accessible from anywhere
-export const workerNamespace = createNamespace('gent_context')
+export const automatNamespace = createNamespace('gent_context')
 
-class Worker {
+class Automat {
   process: Process
   modifier: ModifierType
   debug: boolean
@@ -53,7 +53,7 @@ class Worker {
     // let process.attributes.init to modify output or process state
     const result = await ctx.runWithContext(
       context,
-      workerNamespace,
+      automatNamespace,
       this.process.attributes.init,
       [initialData],
     )
@@ -92,7 +92,7 @@ class Worker {
 
     const result: SubtaskResult = await ctx.runWithContext(
       context,
-      workerNamespace,
+      automatNamespace,
       subtask.func,
       attrs,
     )
@@ -290,7 +290,7 @@ class Worker {
 
     const result: SubtaskResult = await ctx.runWithContext(
       context,
-      workerNamespace,
+      automatNamespace,
       subtask.func,
       attrs,
     )
@@ -495,4 +495,4 @@ class Worker {
   }
 }
 
-export default Worker
+export default Automat

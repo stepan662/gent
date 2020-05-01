@@ -1,12 +1,12 @@
 {
   "name": "gent-core",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "description": "Library for simple business processes implementation",
   "scripts": {
     "build": "tsc",
     "test-watch": "jest --watchAll",
     "test": "jest",
-    "prepare": "rm -rf lib && tsc"
+    "prepare": "jest && rm -rf lib && tsc"
   },
   "repository": {
     "type": "git",

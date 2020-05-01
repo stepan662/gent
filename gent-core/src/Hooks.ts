@@ -1,6 +1,6 @@
 import { ProcessStateType } from './Types'
 import { updateContextState } from './Context'
-import { workerNamespace } from './Worker'
+import { automatNamespace } from './Automat'
 import Process from './Process'
 
 const scopedChanges = (scope: string, changes: { [path: string]: any }) => {
@@ -12,12 +12,12 @@ const scopedChanges = (scope: string, changes: { [path: string]: any }) => {
 }
 
 const __gentUpdateProcessState = (changes: { [path: string]: any }): void => {
-  const context = workerNamespace.get('context')
+  const context = automatNamespace.get('context')
   updateContextState(context, changes)
 }
 
 const __gentGetProcessState = (): ProcessStateType => {
-  return workerNamespace.get('context').state
+  return automatNamespace.get('context').state
 }
 
 export const gentGetState = (): any => {
@@ -46,7 +46,7 @@ export const gentGetTags = () => {
 }
 
 export const gentGetProcess = (): Process => {
-  return workerNamespace.get('context').process
+  return automatNamespace.get('context').process
 }
 
 export const gentGetStatus = () => {
