@@ -175,7 +175,7 @@ export type ProcessResourceType = {
 export interface ModifierType {
   createProcess(process: ProcessStateType): Promise<ProcessStateType>
 
-  updateProcess(process: ProcessStateType, changes?: JournalMutationType): Promise<ProcessStateType>
+  updateProcess(process: ProcessStateType, changes: JournalMutationType): Promise<ProcessStateType>
 
   getProcess(processId: string): Promise<ProcessStateType>
 

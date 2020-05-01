@@ -1,6 +1,7 @@
 import b from '../NodeBuilder'
 import * as n from '../Node'
 import Process from '../Process'
+import { gentUpdateTags } from '../Hooks'
 
 const [start, task] = b.connect(
   // start event
@@ -14,7 +15,8 @@ const [start, task] = b.connect(
     id: 'task',
     name: 'First task',
     exec: async () => {
-      // console.log('Hello my first task')
+      gentUpdateTags({ task: 'passed' })
+      return 'hello_task_output'
     },
   }),
 )

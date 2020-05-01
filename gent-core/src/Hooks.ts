@@ -11,44 +11,62 @@ const scopedChanges = (scope: string, changes: { [path: string]: any }) => {
   return scopedChanges
 }
 
-export const _gentUpdateProcessState = (changes: { [path: string]: any }): void => {
+const __gentUpdateProcessState = (changes: { [path: string]: any }): void => {
   const context = workerNamespace.get('context')
   updateContextState(context, changes)
 }
 
-export const _gentGetProcessState = (): ProcessStateType => {
+const __gentGetProcessState = (): ProcessStateType => {
   return workerNamespace.get('context').state
 }
 
 export const gentGetState = (): any => {
-  return _gentGetProcessState().task_state
+  return __gentGetProcessState().task_state
 }
 
 export const gentSetState = (data) => {
-  _gentUpdateProcessState({ [`task_state`]: data })
+  __gentUpdateProcessState({ [`task_state`]: data })
 }
 
 export const gentGetOutputs = (): { [taskId: string]: any } => {
-  const state = _gentGetProcessState()
+  const state = __gentGetProcessState()
   return state.outputs
 }
 
 export const gentUpdateState = (changes: { [path: string]: any }) => {
-  _gentUpdateProcessState(scopedChanges(`task_state`, changes))
+  __gentUpdateProcessState(scopedChanges(`task_state`, changes))
 }
 
 export const gentUpdateTags = (tags: { [key: string]: string }) => {
-  _gentUpdateProcessState(scopedChanges('tags', tags))
+  __gentUpdateProcessState(scopedChanges('tags', tags))
 }
 
 export const gentGetTags = () => {
-  return _gentGetProcessState().tags
+  return __gentGetProcessState().tags
 }
 
 export const gentGetProcess = (): Process => {
   return workerNamespace.get('context').process
 }
 
+export const gentGetStatus = () => {
+  return __gentGetProcessState().status
+}
+
+export const gentGetTaskInfo = () => {
+  const { error, task, subtask, status } = __gentGetProcessState()
+  return { error, task, subtask, status }
+}
+
+export const gentGetProcessInfo = () => {
+  const { id, type } = __gentGetProcessState()
+  return { id, type }
+}
+
+export const gentGetCurrentEvent = () => {
+  return __gentGetProcessState().current_event
+}
+
 export const gentGetProcessId = (): string => {
-  return _gentGetProcessState().id
+  return __gentGetProcessState().id
 }

@@ -214,9 +214,14 @@ class Worker {
     if (currentEvent.subtask === null) {
       // this means, that this is start of the task
 
-      // set new task id
+      // set new task id prepare state
       ctx.updateContextState(context, {
         task: taskId,
+      })
+
+      // init state
+      ctx.updateContextState(context, {
+        task_state: {},
       })
 
       // setup timeout if exists
@@ -230,30 +235,21 @@ class Worker {
 
     await this.pushProcessState(context, `${taskId}.${subtaskId}.start`)
 
-    const node = this.process.getNode(taskId)
-
     let unhandledError = null
 
     try {
-      switch (node.type) {
-        case 'task':
-        case 'exclusive':
-          await this.runSyncSubtask(context, currentEvent)
-          break
-
-        case 'end':
-          await this.handleEnd(context)
-          break
-
-        default:
-          throw new Error(`Unknown node type '${node.type}'`)
-      }
+      await this.runSyncSubtask(context, currentEvent)
     } catch (err) {
       const error = this.createError(err)
 
       if (this.errorFindNext(taskId, error)) {
         // there is error handler
-        await this.handleError(context, currentEvent, error)
+        try {
+          await this.handleError(context, currentEvent, error)
+        } catch (e) {
+          // fail in error handler
+          unhandledError = e
+        }
       } else {
         unhandledError = error
       }
@@ -331,22 +327,27 @@ class Worker {
   private async runSyncSubtask(context: ProcessContextType, event: ProcessEventType) {
     const { taskId, subtaskId } = this.unwrapEvent(event)
 
+    const node = this.process.getNode(taskId)
+
     const subtask = subtaskId ? this.getSubtask(taskId, subtaskId) : null
 
     if (subtask !== null && subtask.type === 'sync') {
       // executable subtasks
       // execute them and decide what will be the next (task or subtask)
       await this.executeSubtask(context, taskId, subtaskId)
+    } else if (node.type === 'end') {
+      // end task - finish the process
+      ctx.updateContextState(context, {
+        status: 'finished',
+        subtask: null,
+      })
     } else {
-      // external subtasks - pause the process and wait for resolution
+      // external subtask - pause the process and wait for resolution
       ctx.updateContextState(context, {
         status: 'waiting',
+        subtask: null,
       })
     }
-  }
-
-  private async handleEnd(context: ProcessContextType) {
-    ctx.updateContextState(context, { status: 'finished' })
   }
 
   private async handleError(
@@ -375,7 +376,7 @@ class Worker {
       this.debug &&
         console.log(new Date().toISOString(), 'push_state'.padEnd(20), task, subtask, status)
     }
-    context.state = await this.modifier.updateProcess(context.state)
+    context.state = await this.modifier.updateProcess(context.state, mutation)
     await this.modifier.addJournalEntry({ ...mutation, process_id: context.state.id })
     context.journal = []
   }
@@ -428,9 +429,7 @@ class Worker {
     })
     // remove all future events related to this task
     ctx.updateContextState(context, {
-      events: context.state.events.filter(
-        (e) => !String(e.subtask).startsWith('@') && e.task !== taskId,
-      ),
+      events: context.state.events.filter((e) => e.task !== taskId),
     })
   }
 

@@ -1,4 +1,4 @@
-import { gentGetProcess, _gentGetProcessState, gentGetOutputs } from './Hooks'
+import { gentGetProcess, gentGetOutputs, gentGetTaskInfo } from './Hooks'
 
 import {
   TaskType,
@@ -145,7 +145,7 @@ export const linkTimeout = ({ timeout, exec, ...props }: TimeoutLinkInputType): 
     link_type: 'timeout',
     exec: subtaskSync(async () => {
       const result = subtaskResultOrDefault(exec ? await exec() : null)
-      const taskId = _gentGetProcessState().task
+      const taskId = gentGetTaskInfo().task
       const connection = gentGetProcess().connections.find(
         (c) => c.from === taskId && c.link_type === 'timeout',
       )

@@ -35,6 +35,8 @@ describe('Worker', () => {
     expect(state.events.length).toBe(1)
     expect(state.status).toBe('running')
     expect(state.task).toBe('task')
+    expect(state.outputs.task).toBe('hello_task_output')
+    expect(state.tags.task).toBe('passed')
 
     state = await runSyncStep(worker)
 
@@ -109,6 +111,7 @@ describe('Worker', () => {
 
     expect(state.status).toBe('waiting')
     expect(state.task).toBe('task')
+    expect(state.subtask).toBe(null)
 
     // expecting timeout event to stay in events array
     expect(state.events.length).toBe(1)
