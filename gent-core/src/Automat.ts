@@ -120,7 +120,7 @@ class Automat {
 
     // there are planned events (like timeout)
     // we will need this info to predict if there wasn't a conflict
-    const somethingPlanned = state.events.length > 1
+    const somethingPlanned = state.events.length > 0
 
     // setup context
     let context = this.initContext(state)
@@ -132,15 +132,19 @@ class Automat {
 
     let result = await this.executeSubtask(context, taskId, subtaskId, attrs)
 
-    if (somethingPlanned) {
-      // get and remove notifier if there was something planned
-      const notifier = await this.modifier.getAndDeleteNotifier({
-        process_id: processId,
-      })
-      if (!notifier) {
-        // fail if there is no notifier
-        throw new Error('Process in unexpected state (no notifier even though, there shuld be one)')
-      }
+    // get and remove notifier if there was something planned
+    const notifier = await this.modifier.getAndDeleteNotifier({
+      process_id: processId,
+    })
+    if (somethingPlanned && !notifier) {
+      // fail if there is no notifier
+      throw new Error('Process in unexpected state (no notifier even though, there shuld be one)')
+    }
+    if (!somethingPlanned && notifier) {
+      // fail if there is a notifier
+      throw new Error(
+        "Process in unexpected state (there is a notifier even though there shouldn't be)",
+      )
     }
     await this.pushProcessState(context, `${taskId}.${subtaskId}.${context.state.status}`)
     await this.emittNotifier(context.state)
