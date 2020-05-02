@@ -4,8 +4,8 @@
   "description": "Library for simple business processes implementation",
   "scripts": {
     "build": "tsc",
-    "test-watch": "jest --watchAll",
-    "test": "jest",
+    "test-watch": "jest --watch-all",
+    "test": "jest --collect-coverage --collectCoverageFrom=./src/*.ts",
     "prepare": "jest && rm -rf lib && tsc"
   },
   "repository": {
