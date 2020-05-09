@@ -35,7 +35,10 @@ class Automat {
     // standard process initial state
     const start = this.process.nodes[0]
 
-    const initialState: ProcessStateType = {
+    // @ts-ignore
+    let context = this.initContext({})
+
+    ctx.updateContextState(context, {
       id: null,
       created: null,
       type: this.process.attributes.id,
@@ -47,9 +50,7 @@ class Automat {
       outputs: {},
       current_event: null,
       events: [],
-    }
-
-    let context = this.initContext(initialState)
+    })
 
     // let process.attributes.init to modify output or process state
     const result = await ctx.runWithContext(
@@ -68,6 +69,10 @@ class Automat {
 
     // create inital state in db
     const state = await this.modifier.createProcess(context.state)
+
+    const mutation = squashMutations(context.state, context.journal)
+    mutation.message = 'start.init.running'
+    await this.modifier.addJournalEntry({ ...mutation, process_id: context.state.id })
 
     await this.emittNotifier(state)
 

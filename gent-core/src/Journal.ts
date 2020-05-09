@@ -70,7 +70,10 @@ export const createJournalMutation = (
 const checkValidChanges = (changes: MutationType) => {
   const paths = Object.keys(changes)
   for (const path of paths) {
-    const duplicit = paths.find((p) => path != p && path.startsWith(p))
+    const numOfParts = path.split('.').length
+    const duplicit = paths.find((p) => {
+      return path != p && path === p.split('.').slice(0, numOfParts).join('.')
+    })
     if (duplicit) {
       throw new Error(`CHANGE_ERROR: duplicit paths: '${path}' and '${duplicit}'`)
     }

@@ -124,6 +124,11 @@ describe('update state', () => {
     const reverted = serialized(revertState(newState, mutation))
     expect(reverted).toEqual(originalState)
   })
+
+  it('prevents ambiguous changes', () => {
+    const originalState = serialized(state)
+    expect(() => mutateState(state, { current: null, 'current.state': null })).toThrow()
+  })
 })
 
 describe('squashMutations', () => {
