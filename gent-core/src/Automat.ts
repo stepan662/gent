@@ -68,15 +68,15 @@ class Automat {
     ctx.addEvent(context, { task: taskId, subtask: null })
 
     // create inital state in db
-    const state = await this.modifier.createProcess(context.state)
+    context.state = await this.modifier.createProcess(context.state)
 
     const mutation = squashMutations(context.state, context.journal)
     mutation.message = 'start.init.running'
     await this.modifier.addJournalEntry({ ...mutation, process_id: context.state.id })
 
-    await this.emittNotifier(state)
+    await this.emittNotifier(context.state)
 
-    return state
+    return context.state
   }
 
   public async runReadSubtask(processId: string, taskId: string, subtaskId: string, attrs: any[]) {
