@@ -11,6 +11,7 @@ export type ProcessContextType = {
  */
 export type ProcessStateType = {
   id: string
+  created: number
   type: string
   task: string
   subtask: string

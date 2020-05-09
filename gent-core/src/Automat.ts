@@ -37,6 +37,7 @@ class Automat {
 
     const initialState: ProcessStateType = {
       id: null,
+      created: null,
       type: this.process.attributes.id,
       task: start._id,
       subtask: null,
@@ -61,6 +62,7 @@ class Automat {
     const taskId = this.findNextTaskId(start._id)
 
     ctx.updateContextState(context, { [`outputs.start`]: result })
+    ctx.updateContextState(context, { created: Date.now() })
 
     ctx.addEvent(context, { task: taskId, subtask: null })
 
