@@ -223,6 +223,7 @@ class Automat {
       // set new task id prepare state
       ctx.updateContextState(context, {
         task: taskId,
+        subtask: null,
       })
 
       // init state
