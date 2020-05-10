@@ -182,8 +182,6 @@ export interface ModifierType {
 
   addJournalEntry(changes: JournalMutationType): Promise<JournalMutationType>
 
-  getJournalEntries(processId: string): Promise<JournalMutationType[]>
-
   addNotifier(notifier: ProcessNotifierType): Promise<void>
 
   getAndDeleteNotifier(options: ProcessNotifierFilterType): Promise<ProcessNotifierType | null>

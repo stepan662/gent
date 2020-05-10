@@ -60,10 +60,6 @@ class Modifier implements ModifierType {
     return result
   }
 
-  async getJournalEntries(processId: string): Promise<JournalMutationType[]> {
-    return this.data.journal.filter((mutation) => mutation.process_id === processId)
-  }
-
   async addNotifier(notifier: ProcessNotifierType) {
     this.data.queue.push(this.serialize(notifier))
   }
