@@ -13,4 +13,4 @@ protoc \
     --js_out="import_style=commonjs,binary:${OUT_DIR}" \
     --ts_out="service=grpc-node,mode=grpc-js:${OUT_DIR}" \
     --grpc_out="grpc_js:${OUT_DIR}" \
-    songs.proto
+    model.proto

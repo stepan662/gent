@@ -1,15 +1,20 @@
 import * as grpc from '@grpc/grpc-js'
-import { ISongsServer, SongsService } from './proto/songs_grpc_pb'
-import SongsServer from './server/index'
+import { BrokerService } from './proto/model_grpc_pb'
+import { getBrokerServer } from './BrokerServer'
+import WorkManager from './WorkManager'
 
 async function main() {
+  const workManager = new WorkManager()
   const server = new grpc.Server()
-  // @ts-ignore
-  server.addService<ISongsServer>(SongsService, new SongsServer())
+  server.addService(BrokerService, getBrokerServer(workManager))
 
   server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), (err, port) => {
-    server.start()
-    console.log(`server started on port ${port}`)
+    if (err) {
+      console.error(err)
+    } else {
+      server.start()
+      console.log(`server started on port ${port}`)
+    }
   })
 }
 

@@ -1,0 +1,48 @@
+
+syntax = "proto3";
+
+enum ProcessStatus {
+  running = 0;
+  waiting = 1;
+  finished = 2;
+  error = 3;
+}
+
+message Worker {
+  string type = 1;
+  string version = 2;
+}
+
+message Event {
+  string id = 1;
+  string subtask = 2;
+  int64 creaded = 3;
+  int64 deploy_time = 4;
+  string data = 5;
+}
+
+message Process {
+  string id = 1;
+  string type = 2;
+  ProcessStatus status = 4;
+  string current_task = 5;
+  string current_state = 6;
+  string current_subtask = 7;
+  string global_state = 8;
+  string input = 9;
+  string output = 10;
+  string error = 11;
+  repeated string tags = 12;
+}
+
+message WorkerMessage {
+  oneof data {
+    Worker worker = 1;
+    Event event = 2;
+    Process process = 3;
+  }
+}
+
+service Broker {
+  rpc Worker(stream WorkerMessage) returns (stream WorkerMessage);
+}
