@@ -1,48 +1,53 @@
-
 syntax = "proto3";
-
-enum ProcessStatus {
-  running = 0;
-  waiting = 1;
-  finished = 2;
-  error = 3;
-}
 
 message Worker {
   string type = 1;
   string version = 2;
 }
 
-message Event {
-  string id = 1;
-  string subtask = 2;
-  int64 creaded = 3;
-  int64 deploy_time = 4;
-  string data = 5;
+message ProcessInput {
+  string type = 1;
+  string version = 2;
+  string caller = 3;
+  string input = 4;
 }
 
 message Process {
   string id = 1;
-  string type = 2;
-  ProcessStatus status = 4;
-  string current_task = 5;
-  string current_state = 6;
+  uint64 created = 2;
+  string type = 3;
+  string version = 4;
+  string status = 5;
+  string current_task = 6;
   string current_subtask = 7;
-  string global_state = 8;
-  string input = 9;
-  string output = 10;
-  string error = 11;
-  repeated string tags = 12;
+  string current_state = 8;
+  string current_input = 9;
+  uint64 current_deploy_time = 10;
+  string state = 11;
+  string input = 12;
+  string output = 13;
+  string error = 14;
+  repeated string tags = 15;
+  bool active = 16;
 }
 
-message WorkerMessage {
+message WorkerIn {
   oneof data {
-    Worker worker = 1;
-    Event event = 2;
-    Process process = 3;
+    Worker register_worker = 1;
+    Process create_process = 2;
+    Process step_result = 3;
+  }
+}
+
+message WorkerOut {
+  oneof data {
+    ProcessInput validate_input = 1;
+    Process make_step = 2;
   }
 }
 
 service Broker {
-  rpc Worker(stream WorkerMessage) returns (stream WorkerMessage);
+  rpc worker(stream WorkerIn) returns (stream WorkerOut);
+  rpc create_process(Process) returns (Process);
+  rpc step_result(Process) returns (Process);
 }

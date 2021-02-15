@@ -27,39 +27,35 @@ export namespace Worker {
   }
 }
 
-export class Event extends jspb.Message {
-  getId(): string;
-  setId(value: string): void;
+export class ProcessInput extends jspb.Message {
+  getType(): string;
+  setType(value: string): void;
 
-  getSubtask(): string;
-  setSubtask(value: string): void;
+  getVersion(): string;
+  setVersion(value: string): void;
 
-  getCreaded(): number;
-  setCreaded(value: number): void;
+  getCaller(): string;
+  setCaller(value: string): void;
 
-  getDeployTime(): number;
-  setDeployTime(value: number): void;
-
-  getData(): string;
-  setData(value: string): void;
+  getInput(): string;
+  setInput(value: string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Event.AsObject;
-  static toObject(includeInstance: boolean, msg: Event): Event.AsObject;
+  toObject(includeInstance?: boolean): ProcessInput.AsObject;
+  static toObject(includeInstance: boolean, msg: ProcessInput): ProcessInput.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: Event, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Event;
-  static deserializeBinaryFromReader(message: Event, reader: jspb.BinaryReader): Event;
+  static serializeBinaryToWriter(message: ProcessInput, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProcessInput;
+  static deserializeBinaryFromReader(message: ProcessInput, reader: jspb.BinaryReader): ProcessInput;
 }
 
-export namespace Event {
+export namespace ProcessInput {
   export type AsObject = {
-    id: string,
-    subtask: string,
-    creaded: number,
-    deployTime: number,
-    data: string,
+    type: string,
+    version: string,
+    caller: string,
+    input: string,
   }
 }
 
@@ -67,23 +63,35 @@ export class Process extends jspb.Message {
   getId(): string;
   setId(value: string): void;
 
+  getCreated(): number;
+  setCreated(value: number): void;
+
   getType(): string;
   setType(value: string): void;
 
-  getStatus(): ProcessStatusMap[keyof ProcessStatusMap];
-  setStatus(value: ProcessStatusMap[keyof ProcessStatusMap]): void;
+  getVersion(): string;
+  setVersion(value: string): void;
+
+  getStatus(): string;
+  setStatus(value: string): void;
 
   getCurrentTask(): string;
   setCurrentTask(value: string): void;
 
-  getCurrentState(): string;
-  setCurrentState(value: string): void;
-
   getCurrentSubtask(): string;
   setCurrentSubtask(value: string): void;
 
-  getGlobalState(): string;
-  setGlobalState(value: string): void;
+  getCurrentState(): string;
+  setCurrentState(value: string): void;
+
+  getCurrentInput(): string;
+  setCurrentInput(value: string): void;
+
+  getCurrentDeployTime(): number;
+  setCurrentDeployTime(value: number): void;
+
+  getState(): string;
+  setState(value: string): void;
 
   getInput(): string;
   setInput(value: string): void;
@@ -99,6 +107,9 @@ export class Process extends jspb.Message {
   setTagsList(value: Array<string>): void;
   addTags(value: string, index?: number): string;
 
+  getActive(): boolean;
+  setActive(value: boolean): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Process.AsObject;
   static toObject(includeInstance: boolean, msg: Process): Process.AsObject;
@@ -112,67 +123,98 @@ export class Process extends jspb.Message {
 export namespace Process {
   export type AsObject = {
     id: string,
+    created: number,
     type: string,
-    status: ProcessStatusMap[keyof ProcessStatusMap],
+    version: string,
+    status: string,
     currentTask: string,
-    currentState: string,
     currentSubtask: string,
-    globalState: string,
+    currentState: string,
+    currentInput: string,
+    currentDeployTime: number,
+    state: string,
     input: string,
     output: string,
     error: string,
     tagsList: Array<string>,
+    active: boolean,
   }
 }
 
-export class WorkerMessage extends jspb.Message {
-  hasWorker(): boolean;
-  clearWorker(): void;
-  getWorker(): Worker | undefined;
-  setWorker(value?: Worker): void;
+export class WorkerIn extends jspb.Message {
+  hasRegisterWorker(): boolean;
+  clearRegisterWorker(): void;
+  getRegisterWorker(): Worker | undefined;
+  setRegisterWorker(value?: Worker): void;
 
-  hasEvent(): boolean;
-  clearEvent(): void;
-  getEvent(): Event | undefined;
-  setEvent(value?: Event): void;
+  hasCreateProcess(): boolean;
+  clearCreateProcess(): void;
+  getCreateProcess(): Process | undefined;
+  setCreateProcess(value?: Process): void;
 
-  hasProcess(): boolean;
-  clearProcess(): void;
-  getProcess(): Process | undefined;
-  setProcess(value?: Process): void;
+  hasStepResult(): boolean;
+  clearStepResult(): void;
+  getStepResult(): Process | undefined;
+  setStepResult(value?: Process): void;
 
-  getDataCase(): WorkerMessage.DataCase;
+  getDataCase(): WorkerIn.DataCase;
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): WorkerMessage.AsObject;
-  static toObject(includeInstance: boolean, msg: WorkerMessage): WorkerMessage.AsObject;
+  toObject(includeInstance?: boolean): WorkerIn.AsObject;
+  static toObject(includeInstance: boolean, msg: WorkerIn): WorkerIn.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: WorkerMessage, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): WorkerMessage;
-  static deserializeBinaryFromReader(message: WorkerMessage, reader: jspb.BinaryReader): WorkerMessage;
+  static serializeBinaryToWriter(message: WorkerIn, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): WorkerIn;
+  static deserializeBinaryFromReader(message: WorkerIn, reader: jspb.BinaryReader): WorkerIn;
 }
 
-export namespace WorkerMessage {
+export namespace WorkerIn {
   export type AsObject = {
-    worker?: Worker.AsObject,
-    event?: Event.AsObject,
-    process?: Process.AsObject,
+    registerWorker?: Worker.AsObject,
+    createProcess?: Process.AsObject,
+    stepResult?: Process.AsObject,
   }
 
   export enum DataCase {
     DATA_NOT_SET = 0,
-    WORKER = 1,
-    EVENT = 2,
-    PROCESS = 3,
+    REGISTER_WORKER = 1,
+    CREATE_PROCESS = 2,
+    STEP_RESULT = 3,
   }
 }
 
-export interface ProcessStatusMap {
-  RUNNING: 0;
-  WAITING: 1;
-  FINISHED: 2;
-  ERROR: 3;
+export class WorkerOut extends jspb.Message {
+  hasValidateInput(): boolean;
+  clearValidateInput(): void;
+  getValidateInput(): ProcessInput | undefined;
+  setValidateInput(value?: ProcessInput): void;
+
+  hasMakeStep(): boolean;
+  clearMakeStep(): void;
+  getMakeStep(): Process | undefined;
+  setMakeStep(value?: Process): void;
+
+  getDataCase(): WorkerOut.DataCase;
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): WorkerOut.AsObject;
+  static toObject(includeInstance: boolean, msg: WorkerOut): WorkerOut.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: WorkerOut, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): WorkerOut;
+  static deserializeBinaryFromReader(message: WorkerOut, reader: jspb.BinaryReader): WorkerOut;
 }
 
-export const ProcessStatus: ProcessStatusMap;
+export namespace WorkerOut {
+  export type AsObject = {
+    validateInput?: ProcessInput.AsObject,
+    makeStep?: Process.AsObject,
+  }
+
+  export enum DataCase {
+    DATA_NOT_SET = 0,
+    VALIDATE_INPUT = 1,
+    MAKE_STEP = 2,
+  }
+}
 

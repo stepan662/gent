@@ -1,7 +1,7 @@
 import * as grpc from '@grpc/grpc-js'
 import { BrokerService } from './proto/model_grpc_pb'
 import { getBrokerServer } from './BrokerServer'
-import WorkManager from './WorkManager'
+import WorkManager from './WorkersManager'
 
 async function main() {
   const workManager = new WorkManager()
