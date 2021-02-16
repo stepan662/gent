@@ -17,7 +17,7 @@ export function getBrokerServer(manager: WorkersManager) {
           // worker is not initialized
           if (data.registerWorker) {
             // inicializing worker
-            manager.addWorker(workerId, data.registerWorker, call.write)
+            manager.addWorker(workerId, data.registerWorker, call.write.bind(call))
           } else {
             // unexpected message
             call.destroy(new Error(`Expecting 'registerWorker'`))

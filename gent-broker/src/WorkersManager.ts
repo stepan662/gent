@@ -1,5 +1,6 @@
 import { Process, ProcessInput, Worker, WorkerOut } from './proto/model_pb'
 import { processFromObject, processInputFromObject } from './serializers'
+import TasksQueue from './TasksQueue'
 
 type WorkerType = {
   id: string
@@ -9,8 +10,19 @@ type WorkerType = {
 }
 
 class WorkersManager {
-  workers: WorkerType[] = []
-  addWorker(workerId: string, description: Worker.AsObject, write: (data: WorkerOut) => boolean) {
+  workers: WorkerType[]
+  queue: TasksQueue
+
+  constructor() {
+    this.workers = []
+    this.queue = new TasksQueue(this.sendMakeStep)
+  }
+
+  addWorker = (
+    workerId: string,
+    description: Worker.AsObject,
+    write: (data: WorkerOut) => boolean,
+  ) => {
     this.workers.push({
       id: workerId,
       type: description.type,
@@ -20,27 +32,27 @@ class WorkersManager {
     this.printWorkers()
   }
 
-  removeWorker(workerId: string) {
+  removeWorker = (workerId: string) => {
     this.workers = this.workers.filter((w) => w.id !== workerId)
     this.printWorkers()
   }
 
-  getWorkerById(workerId: string) {
+  getWorkerById = (workerId: string) => {
     this.printWorkers()
     return this.workers.find((w) => w.id === workerId)
   }
 
-  async onCreateProcess(data: Process.AsObject): Promise<Process.AsObject> {
-    console.log('create_process', data)
+  onCreateProcess = (data: Process.AsObject) => {
+    this.queue.add(data)
     return data
   }
 
-  async onStepResult(data: Process.AsObject): Promise<Process.AsObject> {
-    console.log('step_result', data)
+  onStepResult = (data: Process.AsObject) => {
+    this.queue.add(data)
     return data
   }
 
-  sendValidateInput(input: ProcessInput.AsObject) {
+  sendValidateInput = (input: ProcessInput.AsObject) => {
     const worker = this.getWorkerOrError(input.type, input.version)
 
     const workerOut = new WorkerOut()
@@ -49,7 +61,8 @@ class WorkersManager {
     worker.write(workerOut)
   }
 
-  sendMakeStep(process: Process.AsObject) {
+  sendMakeStep = (process: Process.AsObject) => {
+    console.log('sendMakeStep')
     const worker = this.getWorkerOrError(process.type, process.version)
 
     const workerOut = new WorkerOut()
@@ -58,11 +71,11 @@ class WorkersManager {
     worker.write(workerOut)
   }
 
-  getWorkerByType(type: string, version: string | null): WorkerType | undefined {
+  getWorkerByType = (type: string, version: string | null): WorkerType | undefined => {
     return this.workers.find((w) => w.type === type && (version === null || w.version === version))
   }
 
-  getWorkerOrError(type: string, version: string | null): WorkerType {
+  getWorkerOrError = (type: string, version: string | null): WorkerType => {
     const worker = this.getWorkerByType(type, version)
     if (!worker) {
       throw new Error(`Worker ${type}, ${version} doesn't exists`)
@@ -71,7 +84,7 @@ class WorkersManager {
   }
 
   printWorkers() {
-    console.log(this.workers)
+    // console.log(this.workers)
   }
 }
 
