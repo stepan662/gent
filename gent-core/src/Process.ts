@@ -33,8 +33,8 @@ class Process {
 
         this.addIdIfMissing(nextNode, idCounters)
         connections.push({
-          from: node.getNode()._id,
-          to: nextNode.getNode()._id,
+          from: node.getNode().id,
+          to: nextNode.getNode().id,
           ...(linkNode.getNode() as LinkType),
         })
 
@@ -56,20 +56,20 @@ class Process {
 
   getNextConnections(node: NodeType, linkType?: LinkTypeType): Connection[] {
     return this.connections.filter((c) => {
-      return c.from === node._id && (linkType ? c.link_type === linkType : true)
+      return c.from === node.id && (linkType ? c.linkType === linkType : true)
     })
   }
 
   nextNode(node: NodeType) {
     const connection = this.getNextConnections(node)[0]
     if (!connection?.to) {
-      throw Error(`Node ${node._id} has no next node`)
+      return null
     }
     return this.getNode(connection.to)
   }
 
   public getNode(nodeId) {
-    return this.nodes.find((n) => n._id === nodeId)
+    return this.nodes.find((n) => n.id === nodeId)
   }
 
   public getSchema() {
@@ -80,16 +80,14 @@ class Process {
         description: this.attributes.description || null,
       },
       connections: this.connections.map((c) => ({
-        _id: c._id,
         id: c.id || null,
         name: c.name || null,
         description: c.description || null,
         from: c.from,
         to: c.to,
-        link_type: c.link_type,
+        link_type: c.linkType,
       })),
       nodes: this.nodes.map((n) => ({
-        _id: n._id,
         id: n.id,
         name: n.name,
         description: n.description,
@@ -106,17 +104,17 @@ class Process {
   private addIdIfMissing(element: NodeBuilder, idCounters) {
     const node = element.getNode()
 
-    if (node._id) {
+    if (node.id) {
       return
     }
 
     if (node.id) {
-      node._id = node.id
+      node.id = node.id
     } else {
       const elType = node.type
       const num = idCounters[elType] || 0
 
-      node._id = `_${elType}_${num}`
+      node.id = `_${elType}_${num}`
       idCounters[elType] = num + 1
     }
   }

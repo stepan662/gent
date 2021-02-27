@@ -1,4 +1,4 @@
-import { Process, ProcessInput, ProcessError, Worker } from './proto/model_pb'
+import { Process, ProcessInput, ProcessError, Worker } from '../proto/model_pb'
 
 export function processFromObject(input: Process.AsObject) {
   const result = new Process()
@@ -19,7 +19,7 @@ export function processFromObject(input: Process.AsObject) {
   result.setState(input.state)
   result.setInput(input.input)
   result.setOutput(input.output)
-  result.setError(processErrorFromObject(input.error))
+  result.setError(processErrorFromObject(input.error || ({} as any)))
   result.setTagsList(input.tagsList)
 
   return result

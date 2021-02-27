@@ -4,9 +4,11 @@
   "description": "Library for simple business processes implementation",
   "scripts": {
     "build": "tsc",
+    "test-grpc": "ts-node ./src/__tests__/test.ts",
     "test-watch": "jest --watch-all",
     "test": "jest --collect-coverage --collectCoverageFrom=./src/*.ts",
-    "prepare": "jest && rm -rf lib && tsc"
+    "prepare": "jest && rm -rf lib && tsc",
+    "generate": "sh -e ./generate.sh"
   },
   "repository": {
     "type": "git",
@@ -26,15 +28,19 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "continuation-local-storage": "^3.2.1"
+    "@grpc/grpc-js": "^1.2.7",
+    "continuation-local-storage": "^3.2.1",
+    "ts-node": "^9.1.1"
   },
   "devDependencies": {
     "@types/continuation-local-storage": "^3.2.2",
     "@types/express": "^4.17.0",
     "@types/jest": "^25.1.4",
     "@types/node": "^13.9.0",
+    "grpc-tools": "^1.10.0",
     "jest": "^25.1.0",
     "ts-jest": "^25.2.1",
+    "ts-protoc-gen": "^0.14.0",
     "typescript": "^3.4.5"
   }
 }

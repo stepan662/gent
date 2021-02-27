@@ -1,30 +1,45 @@
 import b from '../NodeBuilder'
 import * as n from '../Node'
 import Process from '../Process'
-import { gentUpdateTags } from '../Hooks'
+import { SubtaskResult } from '../Subtask'
 
-const [start, task] = b.connect(
+const [start, exclusive] = b.connect(
   // start event
   n.start({
     id: 'start',
     name: 'Start',
+    init: (input) => {
+      return new SubtaskResult({
+        delay: 5000,
+      })
+    },
   }),
 
   // task
-  n.taskSystem({
+  n.exclusive({
     id: 'task',
     name: 'First task',
-    exec: async () => {
-      gentUpdateTags({ task: 'passed' })
-      return 'hello_task_output'
+    decide: () => {
+      return new SubtaskResult({
+        nextTask: 'end2',
+        delay: 5000,
+      })
     },
   }),
 )
 
-task.connect(
+exclusive.connect(
   // end event
   n.end({
-    id: 'end',
+    id: 'end1',
+    name: 'End',
+  }),
+)
+
+exclusive.connect(
+  // end event
+  n.end({
+    id: 'end2',
     name: 'End',
   }),
 )
@@ -33,7 +48,6 @@ export default new Process(
   {
     id: 'process',
     name: 'My first process',
-    init: (input) => input,
   },
   start,
 )

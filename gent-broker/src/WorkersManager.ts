@@ -29,16 +29,16 @@ class WorkersManager {
       version: description.version,
       write,
     })
-    this.printWorkers()
+    console.log('worker CONNECT', description.type, description.version)
   }
 
   removeWorker = (workerId: string) => {
+    const worker = this.getWorkerById(workerId)
+    console.log('worker DISCONNECT', worker.type, worker.version)
     this.workers = this.workers.filter((w) => w.id !== workerId)
-    this.printWorkers()
   }
 
   getWorkerById = (workerId: string) => {
-    this.printWorkers()
     return this.workers.find((w) => w.id === workerId)
   }
 
@@ -48,12 +48,16 @@ class WorkersManager {
   }
 
   onStepResult = (data: Process.AsObject) => {
-    this.queue.add(data)
+    if (data.status === 'running') {
+      this.queue.add(data)
+    } else {
+      console.log(data.status, data)
+    }
     return data
   }
 
   sendValidateInput = (input: ProcessInput.AsObject) => {
-    const worker = this.getWorkerOrError(input.type, input.version)
+    const worker = this.getWorkerOrFail(input.type, input.version)
 
     const workerOut = new WorkerOut()
     workerOut.setValidateInput(processInputFromObject(input))
@@ -61,12 +65,22 @@ class WorkersManager {
     worker.write(workerOut)
   }
 
-  sendMakeStep = (process: Process.AsObject) => {
+  sendMakeStep = (state: Process.AsObject) => {
     console.log('sendMakeStep')
-    const worker = this.getWorkerOrError(process.type, process.version)
+    const worker = this.getWorkerOrFail(state.type, state.version)
 
     const workerOut = new WorkerOut()
-    workerOut.setMakeStep(processFromObject(process))
+
+    const newProcess: Process.AsObject = {
+      ...state,
+      currentTask: state.nextTask,
+      currentSubtask: state.nextSubtask,
+      nextTask: null,
+      nextSubtask: null,
+      nextDeployTime: null,
+    }
+
+    workerOut.setMakeStep(processFromObject(newProcess))
 
     worker.write(workerOut)
   }
@@ -75,7 +89,7 @@ class WorkersManager {
     return this.workers.find((w) => w.type === type && (version === null || w.version === version))
   }
 
-  getWorkerOrError = (type: string, version: string | null): WorkerType => {
+  getWorkerOrFail = (type: string, version: string | null): WorkerType => {
     const worker = this.getWorkerByType(type, version)
     if (!worker) {
       throw new Error(`Worker ${type}, ${version} doesn't exists`)
@@ -84,7 +98,7 @@ class WorkersManager {
   }
 
   printWorkers() {
-    // console.log(this.workers)
+    console.log(this.workers)
   }
 }
 
