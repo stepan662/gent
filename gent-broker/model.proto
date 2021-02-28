@@ -26,11 +26,11 @@ message Process {
   string status = 5;
   string current_task = 6;
   string current_subtask = 7;
-  string current_state = 8;
-  string current_input = 9;
-  uint64 next_deploy_time = 10;
-  string next_task = 11;
-  string next_subtask = 12;
+  string current_input = 8;
+  uint64 next_deploy_time = 9;
+  string next_task = 10;
+  string next_subtask = 11;
+  string task_state = 12;
   string state = 13;
   string input = 14;
   string output = 15;

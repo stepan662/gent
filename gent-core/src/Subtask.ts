@@ -1,26 +1,35 @@
-type SubtaskResultType = {
+import { ProcessStateType } from './Types'
+
+type SubtaskResultType<T> = {
+  taskState?: any
   state?: any
   nextTask?: string | null
   nextSubtask?: string
   delay?: number
   pause?: boolean
+  returnData?: T
 }
 
-export class SubtaskResult implements SubtaskResultType {
+export class SubtaskResult<T = any> implements SubtaskResultType<T> {
+  taskState?: any
   state?: any
   nextTask?: string
   nextSubtask?: string
   delay?: number
   pause?: boolean
+  returnData?: T
 
-  constructor(props?: SubtaskResultType) {
-    this.nextTask = props?.nextTask
-    this.nextSubtask = props?.nextSubtask
-    this.delay = props?.delay
-    this.pause = props?.pause
+  constructor(options: SubtaskResultType<T>) {
+    this.taskState = options.taskState
+    this.state = options.state
+    this.nextTask = options.nextTask
+    this.nextSubtask = options.nextSubtask
+    this.delay = options.delay
+    this.pause = options.pause
+    this.returnData = options.returnData
   }
 }
 
-export type SubtaskType = (
-  input?: any,
-) => Promise<SubtaskResult | void | any> | SubtaskResult | void | any
+export type SubtaskType<T = any> = (
+  input?: ProcessStateType,
+) => Promise<SubtaskResult<T> | void | any> | SubtaskResult<T> | void | any

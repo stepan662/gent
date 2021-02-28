@@ -11,13 +11,13 @@ async function main() {
 
   const onMessage = async (data: ProcessStateType) => {
     const result = await automat.step(data)
-    console.log(result)
+    console.log(JSON.stringify(result, null, 2))
     await client.processStepResult(result)
   }
 
   client.startWorker(onMessage, 'test', 'test')
   const initialized = await client.createProcess(initProcess)
-  console.log(initialized)
+  console.log(JSON.stringify(initialized, null, 2))
 }
 
 main()

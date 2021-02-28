@@ -1,28 +1,58 @@
 import { Process, ProcessInput, ProcessError, Worker } from '../proto/model_pb'
+import { ProcessStateType } from '../Types'
 
-export function processFromObject(input: Process.AsObject) {
+export function processFromObject(i: ProcessStateType) {
   const result = new Process()
 
-  result.setId(input.id)
-  result.setCreated(input.created)
-  result.setType(input.type)
-  result.setActive(input.active)
-  result.setVersion(input.version)
-  result.setStatus(input.status)
-  result.setCurrentTask(input.currentTask)
-  result.setCurrentSubtask(input.currentSubtask)
-  result.setCurrentState(input.currentState)
-  result.setCurrentInput(input.currentInput)
-  result.setNextDeployTime(input.nextDeployTime)
-  result.setNextTask(input.nextTask)
-  result.setNextSubtask(input.nextSubtask)
-  result.setState(input.state)
-  result.setInput(input.input)
-  result.setOutput(input.output)
-  result.setError(processErrorFromObject(input.error || ({} as any)))
-  result.setTagsList(input.tagsList)
+  result.setId(i.id)
+  result.setCreated(i.created)
+  result.setType(i.type)
+  result.setActive(i.active)
+  result.setVersion(i.version)
+  result.setStatus(i.status)
+  result.setCurrentTask(i.currentTask)
+  result.setCurrentSubtask(i.currentSubtask)
+  i.taskState && result.setTaskState(JSON.stringify(i.taskState))
+  i.currentInput && result.setCurrentInput(JSON.stringify(i.currentInput))
+  result.setNextDeployTime(i.nextDeployTime)
+  result.setNextTask(i.nextTask)
+  result.setNextSubtask(i.nextSubtask)
+  i.state && result.setState(JSON.stringify(i.state))
+  i.input && result.setInput(JSON.stringify(i.input))
+  i.output && result.setOutput(JSON.stringify(i.output))
+  result.setError(processErrorFromObject(i.error || ({} as any)))
+  result.setTagsList(i.tags)
 
   return result
+}
+
+export function processToObject(i: Process): ProcessStateType {
+  const error = i.getError().toObject()
+  const taskState = i.getTaskState()
+  const currentInput = i.getCurrentInput()
+  const state = i.getState()
+  const input = i.getInput()
+  const output = i.getOutput()
+  return {
+    id: i.getId(),
+    created: i.getCreated(),
+    type: i.getType(),
+    active: i.getActive(),
+    version: i.getVersion(),
+    status: i.getStatus(),
+    currentTask: i.getCurrentTask(),
+    currentSubtask: i.getCurrentSubtask(),
+    taskState: taskState && JSON.parse(taskState),
+    currentInput: currentInput && JSON.parse(currentInput),
+    nextDeployTime: i.getNextDeployTime(),
+    nextTask: i.getNextTask(),
+    nextSubtask: i.getNextSubtask(),
+    state: state && JSON.parse(state),
+    input: input && JSON.parse(input),
+    output: output && JSON.parse(output),
+    error: error.name ? error : null,
+    tags: i.getTagsList(),
+  }
 }
 
 export function processInputFromObject(input: ProcessInput.AsObject) {

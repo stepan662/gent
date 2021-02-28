@@ -8,19 +8,19 @@ export type ProcessStateType = {
   created: number
   type: string
   version: string
-  status: ProcessStatusType
+  status: string
   currentTask: string
   currentSubtask: string
-  currentState: any
   currentInput: any
   nextDeployTime: number
   nextTask: string
   nextSubtask: string
+  taskState: any
   state: any
   input: any
   output: any
-  error: any
-  tagsList: string[]
+  error?: ProcessErrorType
+  tags: string[]
   active: boolean
 }
 
@@ -33,7 +33,7 @@ export type ProcessTasksType = {
 export type ProcessErrorType = {
   name: string
   message: string
-  stack?: string
+  stack: string
 }
 
 /*

@@ -109,9 +109,6 @@ export class Process extends jspb.Message {
   getCurrentSubtask(): string;
   setCurrentSubtask(value: string): void;
 
-  getCurrentState(): string;
-  setCurrentState(value: string): void;
-
   getCurrentInput(): string;
   setCurrentInput(value: string): void;
 
@@ -123,6 +120,9 @@ export class Process extends jspb.Message {
 
   getNextSubtask(): string;
   setNextSubtask(value: string): void;
+
+  getTaskState(): string;
+  setTaskState(value: string): void;
 
   getState(): string;
   setState(value: string): void;
@@ -165,11 +165,11 @@ export namespace Process {
     status: string,
     currentTask: string,
     currentSubtask: string,
-    currentState: string,
     currentInput: string,
     nextDeployTime: number,
     nextTask: string,
     nextSubtask: string,
+    taskState: string,
     state: string,
     input: string,
     output: string,

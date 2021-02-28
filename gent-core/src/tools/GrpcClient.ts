@@ -2,7 +2,7 @@ import * as grpc from '@grpc/grpc-js'
 import { BrokerClient } from '../proto/model_grpc_pb'
 import { WorkerIn, WorkerOut, Process } from '../proto/model_pb'
 import { ProcessStateType } from '../Types'
-import { processFromObject, workerFromObject } from './serializers'
+import { processFromObject, processToObject, workerFromObject } from './serializers'
 
 class GrpcClient {
   client: BrokerClient
@@ -21,7 +21,7 @@ class GrpcClient {
     this.onMessage = onMessage
     this.worker = this.client.worker()
     this.worker.on('data', (data: WorkerOut) => {
-      const process = data.getMakeStep().toObject() as ProcessStateType
+      const process = processToObject(data.getMakeStep())
       this.onMessage(process)
     })
 
@@ -38,7 +38,7 @@ class GrpcClient {
     return this.worker
   }
 
-  processStepResult = async (process: Process.AsObject) => {
+  processStepResult = async (process: ProcessStateType) => {
     return new Promise((resolve) => {
       const msg = new WorkerIn()
       msg.setStepResult(processFromObject(process))
@@ -46,13 +46,13 @@ class GrpcClient {
     })
   }
 
-  createProcess = (data: Process.AsObject) => {
+  createProcess = (data: ProcessStateType): Promise<ProcessStateType> => {
     return new Promise((resolve, reject) => {
       this.client.create_process(processFromObject(data), (err, data) => {
         if (err) {
           reject(err)
         } else {
-          resolve(data.toObject())
+          resolve(processToObject(data))
         }
       })
     })

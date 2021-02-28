@@ -16,38 +16,35 @@ class Automat {
   public startProcess = async (initialData: any, type: string, version: string) => {
     const start = this.process.nodes[0] as StartType
 
-    const rawResult = await start.init(initialData)
-    const result = this.getResult(start, rawResult)
-
-    const state: ProcessStateType = {
+    const initState: ProcessStateType = {
       id: null,
-      created: null,
+      created: Date.now(),
       type: type,
       version: version,
       status: 'running',
       currentTask: start.id,
       currentSubtask: 'init',
-      currentState: {},
       currentInput: null,
-      nextTask: result.nextTask,
-      nextSubtask: result.nextSubtask,
-      nextDeployTime: result.deployTime,
-      state: {},
+      nextTask: null,
+      nextSubtask: null,
+      nextDeployTime: null,
+      taskState: null,
+      state: null,
       input: initialData,
       output: null,
       error: null,
-      tagsList: [],
+      tags: [],
       active: null,
     }
 
-    return state
+    return this.step(initState)
   }
 
   public step = async (state: ProcessStateType): Promise<ProcessStateType> => {
     const task = this.process.getNode(state.currentTask)
 
     try {
-      const rawResult = await task[state.currentSubtask]()
+      const rawResult = await task[state.currentSubtask]({ ...state })
       const result = this.getResult(task, rawResult)
 
       if (!result.nextTask && task.type === 'end') {
@@ -62,6 +59,7 @@ class Automat {
           nextSubtask: result.nextSubtask,
           nextDeployTime: result.deployTime,
           state: result.state || state.state,
+          taskState: result.isNewTask ? null : result.taskState || state.taskState,
         }
       }
     } catch (e) {
@@ -85,10 +83,6 @@ class Automat {
 
     if (result.nextTask && result.nextSubtask) {
       throw new Error(`It's forbitten to use "nextTask" and "nextSubtask" at the same time`)
-    } else if (result.nextSubtask) {
-      nextTask = node.id
-      nextSubtask = result.nextSubtask
-      isNewTask = true
     } else if (result?.nextTask) {
       const next = this.process.getNode(result.nextTask)
       if (!next) {
@@ -97,11 +91,15 @@ class Automat {
       nextTask = next.id
       nextSubtask = next._first
       isNewTask = true
+    } else if (result.nextSubtask) {
+      nextTask = node.id
+      nextSubtask = result.nextSubtask
+      isNewTask = false
     } else {
       const next = this.process.nextNode(node)
       nextTask = next?.id
       nextSubtask = next?._first
-      isNewTask = false
+      isNewTask = true
     }
 
     return {

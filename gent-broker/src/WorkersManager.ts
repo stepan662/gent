@@ -57,7 +57,12 @@ class WorkersManager {
   }
 
   sendValidateInput = (input: ProcessInput.AsObject) => {
-    const worker = this.getWorkerOrFail(input.type, input.version)
+    const worker = this.getWorkerByType(input.type, input.version)
+
+    if (!worker) {
+      console.error(`Worker ${input.type}, ${input.version} doesn't exists`)
+      return
+    }
 
     const workerOut = new WorkerOut()
     workerOut.setValidateInput(processInputFromObject(input))
@@ -66,8 +71,13 @@ class WorkersManager {
   }
 
   sendMakeStep = (state: Process.AsObject) => {
-    console.log('sendMakeStep')
-    const worker = this.getWorkerOrFail(state.type, state.version)
+    console.log('sendMakeStep', state.currentTask, state.currentSubtask)
+    const worker = this.getWorkerByType(state.type, state.version)
+
+    if (!worker) {
+      console.error(`Worker ${state.type}, ${state.version} doesn't exists`)
+      return
+    }
 
     const workerOut = new WorkerOut()
 
@@ -87,14 +97,6 @@ class WorkersManager {
 
   getWorkerByType = (type: string, version: string | null): WorkerType | undefined => {
     return this.workers.find((w) => w.type === type && (version === null || w.version === version))
-  }
-
-  getWorkerOrFail = (type: string, version: string | null): WorkerType => {
-    const worker = this.getWorkerByType(type, version)
-    if (!worker) {
-      throw new Error(`Worker ${type}, ${version} doesn't exists`)
-    }
-    return worker
   }
 
   printWorkers() {

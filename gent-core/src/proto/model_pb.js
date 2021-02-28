@@ -764,11 +764,11 @@ proto.Process.toObject = function(includeInstance, msg) {
     status: jspb.Message.getFieldWithDefault(msg, 5, ""),
     currentTask: jspb.Message.getFieldWithDefault(msg, 6, ""),
     currentSubtask: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    currentState: jspb.Message.getFieldWithDefault(msg, 8, ""),
-    currentInput: jspb.Message.getFieldWithDefault(msg, 9, ""),
-    nextDeployTime: jspb.Message.getFieldWithDefault(msg, 10, 0),
-    nextTask: jspb.Message.getFieldWithDefault(msg, 11, ""),
-    nextSubtask: jspb.Message.getFieldWithDefault(msg, 12, ""),
+    currentInput: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    nextDeployTime: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    nextTask: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    nextSubtask: jspb.Message.getFieldWithDefault(msg, 11, ""),
+    taskState: jspb.Message.getFieldWithDefault(msg, 12, ""),
     state: jspb.Message.getFieldWithDefault(msg, 13, ""),
     input: jspb.Message.getFieldWithDefault(msg, 14, ""),
     output: jspb.Message.getFieldWithDefault(msg, 15, ""),
@@ -841,23 +841,23 @@ proto.Process.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 8:
       var value = /** @type {string} */ (reader.readString());
-      msg.setCurrentState(value);
-      break;
-    case 9:
-      var value = /** @type {string} */ (reader.readString());
       msg.setCurrentInput(value);
       break;
-    case 10:
+    case 9:
       var value = /** @type {number} */ (reader.readUint64());
       msg.setNextDeployTime(value);
       break;
-    case 11:
+    case 10:
       var value = /** @type {string} */ (reader.readString());
       msg.setNextTask(value);
       break;
-    case 12:
+    case 11:
       var value = /** @type {string} */ (reader.readString());
       msg.setNextSubtask(value);
+      break;
+    case 12:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTaskState(value);
       break;
     case 13:
       var value = /** @type {string} */ (reader.readString());
@@ -962,35 +962,35 @@ proto.Process.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getCurrentState();
+  f = message.getCurrentInput();
   if (f.length > 0) {
     writer.writeString(
       8,
       f
     );
   }
-  f = message.getCurrentInput();
-  if (f.length > 0) {
-    writer.writeString(
-      9,
-      f
-    );
-  }
   f = message.getNextDeployTime();
   if (f !== 0) {
     writer.writeUint64(
-      10,
+      9,
       f
     );
   }
   f = message.getNextTask();
   if (f.length > 0) {
     writer.writeString(
-      11,
+      10,
       f
     );
   }
   f = message.getNextSubtask();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
+      f
+    );
+  }
+  f = message.getTaskState();
   if (f.length > 0) {
     writer.writeString(
       12,
@@ -1170,10 +1170,10 @@ proto.Process.prototype.setCurrentSubtask = function(value) {
 
 
 /**
- * optional string current_state = 8;
+ * optional string current_input = 8;
  * @return {string}
  */
-proto.Process.prototype.getCurrentState = function() {
+proto.Process.prototype.getCurrentInput = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
 };
 
@@ -1182,35 +1182,17 @@ proto.Process.prototype.getCurrentState = function() {
  * @param {string} value
  * @return {!proto.Process} returns this
  */
-proto.Process.prototype.setCurrentState = function(value) {
+proto.Process.prototype.setCurrentInput = function(value) {
   return jspb.Message.setProto3StringField(this, 8, value);
 };
 
 
 /**
- * optional string current_input = 9;
- * @return {string}
- */
-proto.Process.prototype.getCurrentInput = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.Process} returns this
- */
-proto.Process.prototype.setCurrentInput = function(value) {
-  return jspb.Message.setProto3StringField(this, 9, value);
-};
-
-
-/**
- * optional uint64 next_deploy_time = 10;
+ * optional uint64 next_deploy_time = 9;
  * @return {number}
  */
 proto.Process.prototype.getNextDeployTime = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
 };
 
 
@@ -1219,16 +1201,16 @@ proto.Process.prototype.getNextDeployTime = function() {
  * @return {!proto.Process} returns this
  */
 proto.Process.prototype.setNextDeployTime = function(value) {
-  return jspb.Message.setProto3IntField(this, 10, value);
+  return jspb.Message.setProto3IntField(this, 9, value);
 };
 
 
 /**
- * optional string next_task = 11;
+ * optional string next_task = 10;
  * @return {string}
  */
 proto.Process.prototype.getNextTask = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
 };
 
 
@@ -1237,16 +1219,16 @@ proto.Process.prototype.getNextTask = function() {
  * @return {!proto.Process} returns this
  */
 proto.Process.prototype.setNextTask = function(value) {
-  return jspb.Message.setProto3StringField(this, 11, value);
+  return jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
 /**
- * optional string next_subtask = 12;
+ * optional string next_subtask = 11;
  * @return {string}
  */
 proto.Process.prototype.getNextSubtask = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
 };
 
 
@@ -1255,6 +1237,24 @@ proto.Process.prototype.getNextSubtask = function() {
  * @return {!proto.Process} returns this
  */
 proto.Process.prototype.setNextSubtask = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
+};
+
+
+/**
+ * optional string task_state = 12;
+ * @return {string}
+ */
+proto.Process.prototype.getTaskState = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.Process} returns this
+ */
+proto.Process.prototype.setTaskState = function(value) {
   return jspb.Message.setProto3StringField(this, 12, value);
 };
 
