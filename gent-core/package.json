@@ -8,7 +8,8 @@
     "test-watch": "jest --watch-all",
     "test": "jest --collect-coverage --collectCoverageFrom=./src/*.ts",
     "prepare": "jest && rm -rf lib && yarn build",
-    "generate": "sh -e ./generate.sh"
+    "generate": "sh -e ./generate.sh",
+    "dev": "watch -p \"./src/**\" -c \"tsc\""
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
     "ts-jest": "^25.2.1",
     "ts-node": "^9.1.1",
     "ts-protoc-gen": "^0.14.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "watch-cli": "^0.2.3"
   }
 }

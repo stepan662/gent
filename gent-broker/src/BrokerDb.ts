@@ -27,6 +27,7 @@ class BrokerDb {
   }
 
   getAllProcesses = async () => {
+    console.log(`getProcesses`, this.processes)
     return this.processes
   }
 }

@@ -8,6 +8,7 @@ import Exclusive from './Exclusive'
 import Link from './Link'
 import ErrorEvent from './ErrorEvent'
 import TimeoutEvent from './TimeoutEvent'
+import { ProcessStateType } from './types'
 
 import Context from './Context'
 
@@ -32,19 +33,19 @@ const DEFAULT_THEME = {
 }
 
 const getNext = (schema, element) => {
-  const connections = schema.connections.filter((c) => c.from === element._id)
-  const nextNodes = schema.nodes.filter((n) => connections.find((c) => c.to === n._id))
+  const connections = schema.connections.filter((c) => c.from === element.id)
+  const nextNodes = schema.nodes.filter((n) => connections.find((c) => c.to === n.id))
   return [connections, nextNodes]
 }
 
-const getFillColor = (state, taskId, theme) => {
-  if (state?.task === taskId && state?.subtask !== 'timeout') {
+const getFillColor = (state: ProcessStateType, taskId, theme) => {
+  if (state?.currentTask === taskId) {
     switch (state.status) {
       case 'error':
         return theme.taskErrorBackground
       case 'running':
       case 'finished':
-        return theme.taskRunningBackground
+        return state.nextDeployTime ? theme.taskWaitingBackground : theme.taskRunningBackground
       case 'waiting':
         return theme.taskWaitingBackground
       default:
@@ -67,7 +68,7 @@ const VisualProcess = ({
   customTheme,
 }: {
   schema: any
-  state?: any
+  state?: ProcessStateType
   customTheme?: any
 }) => {
   const theme = { ...DEFAULT_THEME, ...customTheme }
@@ -95,7 +96,7 @@ const VisualProcess = ({
       const [connections, nextNodes] = getNext(schema, node)
 
       nextNodes.forEach((nextNode) => {
-        if (!nodes.find((n) => nextNode._id === n._id)) {
+        if (!nodes.find((n) => nextNode.id === n.id)) {
           nodes.push(nextNode)
         }
       })
@@ -104,12 +105,12 @@ const VisualProcess = ({
           connection.from,
           connection.to,
           {
-            id: connection._id,
+            id: connection.id,
             labeloffset: 0,
             labelpos: 'c',
             ...Link.getSize(connection, theme),
           },
-          connection._id,
+          connection.id,
         )
       })
     }
@@ -121,7 +122,7 @@ const VisualProcess = ({
     })
 
     nodes.forEach((node) => {
-      graph.setNode(node._id, {
+      graph.setNode(node.id, {
         label: node.name || node.id,
         ...defaultElements[node.type].getSize(node, theme),
       })
@@ -152,7 +153,7 @@ const VisualProcess = ({
         <g>
           {graph.edges().map((edge) => {
             const edgeProperties = graph.edge(edge)
-            const connectionProperties = schema.connections.find((e) => e._id === edgeProperties.id)
+            const connectionProperties = schema.connections.find((e) => e.id === edgeProperties.id)
             return (
               <Link
                 key={edgeProperties.id}
@@ -164,11 +165,11 @@ const VisualProcess = ({
         </g>
         <g>
           {nodes.map((node) => {
-            const graphNode = graph.node(node._id)
+            const graphNode = graph.node(node.id)
             const Element = defaultElements[node.type]
             return (
               <Element
-                key={node._id}
+                key={node.id}
                 data={node}
                 place={{
                   y: graphNode.y - graphNode.height / 2,
@@ -176,7 +177,7 @@ const VisualProcess = ({
                   height: graphNode.height,
                   width: graphNode.width,
                 }}
-                background={getFillColor(state, node._id, theme)}
+                background={getFillColor(state, node.id, theme)}
               />
             )
           })}
@@ -184,7 +185,7 @@ const VisualProcess = ({
         <g>
           {graph.edges().map((edge) => {
             const edgeProperties = graph.edge(edge)
-            const connectionProperties = schema.connections.find((e) => e._id === edgeProperties.id)
+            const connectionProperties = schema.connections.find((e) => e.id === edgeProperties.id)
             if (connectionProperties.link_type === 'error') {
               return (
                 <ErrorEvent

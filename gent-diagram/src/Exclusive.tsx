@@ -53,14 +53,16 @@ const Exclusive = ({ data, place: { x, y, width, height, ...rest }, clickable, b
         {data.name}
       </text>
       <path
-        d={`M ${center.x - width / 8} ${center.y - width / 8} L ${center.x + width / 8} ${center.y +
-          width / 8}`}
+        d={`M ${center.x - width / 8} ${center.y - width / 8} L ${center.x + width / 8} ${
+          center.y + width / 8
+        }`}
         stroke={theme.taskInnerTextColor}
         {...clickable}
       />
       <path
-        d={`M ${center.x + width / 8} ${center.y - width / 8} L ${center.x - width / 8} ${center.y +
-          width / 8}`}
+        d={`M ${center.x + width / 8} ${center.y - width / 8} L ${center.x - width / 8} ${
+          center.y + width / 8
+        }`}
         stroke={theme.taskInnerTextColor}
         {...clickable}
       />
