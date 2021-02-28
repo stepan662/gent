@@ -1,13 +1,13 @@
 {
   "name": "gent-core",
-  "version": "0.5.15",
+  "version": "1.0.3",
   "description": "Library for simple business processes implementation",
   "scripts": {
-    "build": "tsc",
-    "test-grpc": "ts-node ./src/__tests__/test.ts",
+    "build": "tsc && mkdir -p ./lib/proto/ && cp -r ./src/proto/ ./lib/proto/",
+    "test-grpc": "ts-node ./src/__tests__/custom.ts",
     "test-watch": "jest --watch-all",
     "test": "jest --collect-coverage --collectCoverageFrom=./src/*.ts",
-    "prepare": "jest && rm -rf lib && tsc",
+    "prepare": "jest && rm -rf lib && yarn build",
     "generate": "sh -e ./generate.sh"
   },
   "repository": {

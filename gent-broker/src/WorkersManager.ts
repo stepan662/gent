@@ -1,6 +1,6 @@
-import { Process, ProcessInput, Worker, WorkerOut } from './proto/model_pb'
-import { processFromObject, processInputFromObject } from './serializers'
-import TasksQueue from './TasksQueue'
+import BrokerController from './BrokerController'
+import { Process, Worker, WorkerOut } from './proto/model_pb'
+import { processFromObject } from './serializers'
 
 type WorkerType = {
   id: string
@@ -10,12 +10,12 @@ type WorkerType = {
 }
 
 class WorkersManager {
-  workers: WorkerType[]
-  queue: TasksQueue
+  private workers: WorkerType[]
+  private controller: BrokerController
 
-  constructor() {
+  constructor(controller: BrokerController) {
     this.workers = []
-    this.queue = new TasksQueue(this.sendMakeStep)
+    this.controller = controller
   }
 
   addWorker = (
@@ -42,36 +42,11 @@ class WorkersManager {
     return this.workers.find((w) => w.id === workerId)
   }
 
-  onCreateProcess = (data: Process.AsObject) => {
-    this.queue.add(data)
-    return data
-  }
-
-  onStepResult = (data: Process.AsObject) => {
-    if (data.status === 'running') {
-      this.queue.add(data)
-    } else {
-      console.log(data.status, data)
-    }
-    return data
-  }
-
-  sendValidateInput = (input: ProcessInput.AsObject) => {
-    const worker = this.getWorkerByType(input.type, input.version)
-
-    if (!worker) {
-      console.error(`Worker ${input.type}, ${input.version} doesn't exists`)
-      return
-    }
-
-    const workerOut = new WorkerOut()
-    workerOut.setValidateInput(processInputFromObject(input))
-
-    worker.write(workerOut)
+  onProcessResult = async (data: Process.AsObject) => {
+    return this.controller.processResult(data)
   }
 
   sendMakeStep = (state: Process.AsObject) => {
-    console.log('sendMakeStep', state.currentTask, state.currentSubtask)
     const worker = this.getWorkerByType(state.type, state.version)
 
     if (!worker) {
@@ -81,26 +56,13 @@ class WorkersManager {
 
     const workerOut = new WorkerOut()
 
-    const newProcess: Process.AsObject = {
-      ...state,
-      currentTask: state.nextTask,
-      currentSubtask: state.nextSubtask,
-      nextTask: null,
-      nextSubtask: null,
-      nextDeployTime: null,
-    }
-
-    workerOut.setMakeStep(processFromObject(newProcess))
+    workerOut.setMakeStep(processFromObject(state))
 
     worker.write(workerOut)
   }
 
   getWorkerByType = (type: string, version: string | null): WorkerType | undefined => {
     return this.workers.find((w) => w.type === type && (version === null || w.version === version))
-  }
-
-  printWorkers() {
-    console.log(this.workers)
   }
 }
 

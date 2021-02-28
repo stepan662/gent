@@ -1,6 +1,6 @@
 import Automat from '../Automat'
 import processBasic from './processBasic'
-import GrpcClient from '../tools/GrpcClient'
+import GrpcClient from '../GrpcClient'
 import { ProcessStateType } from '../Types'
 
 async function main() {

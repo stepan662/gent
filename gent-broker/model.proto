@@ -47,6 +47,10 @@ message WorkerIn {
   }
 }
 
+message Processes {
+  repeated Process processes = 1;
+}
+
 message WorkerOut {
   oneof data {
     ProcessInput validate_input = 1;
@@ -54,8 +58,17 @@ message WorkerOut {
   }
 }
 
+message ProcessId {
+  string processId = 1;
+}
+
+message Empty {
+
+}
 service Broker {
   rpc worker(stream WorkerIn) returns (stream WorkerOut);
   rpc create_process(Process) returns (Process);
   rpc step_result(Process) returns (Process);
+  rpc get_process(ProcessId) returns (Process);
+  rpc get_processes(Empty) returns (Processes);
 }

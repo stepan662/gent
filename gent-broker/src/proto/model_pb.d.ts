@@ -221,6 +221,28 @@ export namespace WorkerIn {
   }
 }
 
+export class Processes extends jspb.Message {
+  clearProcessesList(): void;
+  getProcessesList(): Array<Process>;
+  setProcessesList(value: Array<Process>): void;
+  addProcesses(value?: Process, index?: number): Process;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Processes.AsObject;
+  static toObject(includeInstance: boolean, msg: Processes): Processes.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: Processes, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Processes;
+  static deserializeBinaryFromReader(message: Processes, reader: jspb.BinaryReader): Processes;
+}
+
+export namespace Processes {
+  export type AsObject = {
+    processesList: Array<Process.AsObject>,
+  }
+}
+
 export class WorkerOut extends jspb.Message {
   hasValidateInput(): boolean;
   clearValidateInput(): void;
@@ -253,6 +275,42 @@ export namespace WorkerOut {
     DATA_NOT_SET = 0,
     VALIDATE_INPUT = 1,
     MAKE_STEP = 2,
+  }
+}
+
+export class ProcessId extends jspb.Message {
+  getProcessid(): string;
+  setProcessid(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProcessId.AsObject;
+  static toObject(includeInstance: boolean, msg: ProcessId): ProcessId.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProcessId, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProcessId;
+  static deserializeBinaryFromReader(message: ProcessId, reader: jspb.BinaryReader): ProcessId;
+}
+
+export namespace ProcessId {
+  export type AsObject = {
+    processid: string,
+  }
+}
+
+export class Empty extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Empty.AsObject;
+  static toObject(includeInstance: boolean, msg: Empty): Empty.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: Empty, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Empty;
+  static deserializeBinaryFromReader(message: Empty, reader: jspb.BinaryReader): Empty;
+}
+
+export namespace Empty {
+  export type AsObject = {
   }
 }
 

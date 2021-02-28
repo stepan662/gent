@@ -1,10 +1,11 @@
 import * as grpc from '@grpc/grpc-js'
-import { Process, ProcessInput, WorkerIn, WorkerOut } from './proto/model_pb'
+import { Process, WorkerIn, WorkerOut, ProcessId, Processes, Empty } from './proto/model_pb'
 import { IBrokerServer } from './proto/model_grpc_pb'
 import WorkersManager from './WorkersManager'
 import { processFromObject } from './serializers'
+import BrokerController from './BrokerController'
 
-export function getBrokerServer(manager: WorkersManager) {
+export function getBrokerServer(manager: WorkersManager, controller: BrokerController) {
   class BrokerServer implements IBrokerServer {
     [name: string]: grpc.UntypedHandleCall
 
@@ -26,10 +27,10 @@ export function getBrokerServer(manager: WorkersManager) {
           // worker is initialized
           if (data.createProcess) {
             // recieving process data
-            manager.onCreateProcess(data.createProcess)
+            manager.onProcessResult(data.createProcess)
           } else if (data.stepResult) {
             // recieving event data
-            manager.onStepResult(data.stepResult)
+            manager.onProcessResult(data.stepResult)
           } else {
             // unexpected message
             call.destroy(new Error(`Expecting message with field 'process' or 'event'`))
@@ -43,13 +44,32 @@ export function getBrokerServer(manager: WorkersManager) {
 
     create_process: grpc.handleUnaryCall<Process, Process> = async (call, callback) => {
       const data = call.request.toObject()
-      const process = processFromObject(await manager.onCreateProcess(data))
+      const process = processFromObject(await manager.onProcessResult(data))
       callback(null, process)
     }
     step_result: grpc.handleUnaryCall<Process, Process> = async (call, callback) => {
       const data = call.request.toObject()
-      const process = processFromObject(await manager.onStepResult(data))
+      const process = processFromObject(await manager.onProcessResult(data))
       callback(null, process)
+    }
+
+    get_process: grpc.handleUnaryCall<ProcessId, Process> = async (call, callback) => {
+      const id = call.request.getProcessid()
+      try {
+        const process = await controller.getProcess(id)
+        const mappedProcess = processFromObject(process)
+        callback(null, mappedProcess)
+      } catch (e) {
+        callback(e)
+      }
+    }
+
+    get_processes: grpc.handleUnaryCall<Empty, Processes> = async (_call, callback) => {
+      const processes = await controller.getProcesses()
+      const mappedProcesses = processes.map(processFromObject)
+      const result = new Processes()
+      result.setProcessesList(mappedProcesses)
+      callback(null, result)
     }
   }
   return new BrokerServer()
