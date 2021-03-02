@@ -1,0 +1,79 @@
+openapi: '3.0.0'
+info:
+  title: Kiwi.com asm-processing
+  description: Kiwi.com asm-processing app
+  contact:
+    name: stepan.granat@kiwi.com
+  version: '1.0'
+  x-visibility: unlisted
+servers:
+  - url: /
+    description: Kiwi.com asm-processing app
+
+paths:
+  /processes:
+    get:
+      summary: Assessments to process
+      tags:
+        - overview
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json: {}
+        default:
+          description: Error
+          content:
+            application/json:
+              schema: {}
+
+  /start:
+    post:
+      summary: Get next tickets from the queue and assign in to user from User-Email header
+      tags:
+        - process
+
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json: {}
+
+        default:
+          description: Error
+          content:
+            application/json:
+              schema: {}
+
+  /state:
+    get:
+      summary: Get process state any time of it's lifecycle
+      tags:
+        - process
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json: {}
+
+        default:
+          description: Error
+          content:
+            application/json:
+              schema: {}
+
+  /schema:
+    get:
+      summary: Get process schema
+      tags:
+        - process
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json: {}
+        default:
+          description: Error
+          content:
+            application/json:
+              schema: {}

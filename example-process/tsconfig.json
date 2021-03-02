@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "outDir": "build",
+    "strictNullChecks": false,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["dom", "es6"],
+    "declaration": false,
+    "declarationMap": false,
+    "baseUrl": ".",
+    "rootDir": "src"
+  },
+  "lib": ["es6"]
+}
