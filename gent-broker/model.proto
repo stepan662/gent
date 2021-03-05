@@ -39,34 +39,18 @@ message Process {
   bool active = 18;
 }
 
-message WorkerIn {
-  oneof data {
-    Worker register_worker = 1;
-    Process create_process = 2;
-    Process step_result = 3;
-  }
-}
-
 message Processes {
   repeated Process processes = 1;
-}
-
-message WorkerOut {
-  oneof data {
-    ProcessInput validate_input = 1;
-    Process make_step = 2;
-  }
 }
 
 message ProcessId {
   string processId = 1;
 }
 
-message Empty {
+message Empty {}
 
-}
 service Broker {
-  rpc worker(stream WorkerIn) returns (stream WorkerOut);
+  rpc worker(stream Worker) returns (stream Process);
   rpc create_process(Process) returns (Process);
   rpc step_result(Process) returns (Process);
   rpc get_process(ProcessId) returns (Process);

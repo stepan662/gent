@@ -1,13 +1,16 @@
 import * as grpc from '@grpc/grpc-js'
 import { BrokerClient } from './proto/model_grpc_pb'
-import { WorkerIn, WorkerOut, Process, ProcessInput, ProcessId, Empty } from './proto/model_pb'
+import { Worker, Process, ProcessId, Empty } from './proto/model_pb'
 import { ProcessStateType } from './Types'
 import { processFromObject, processToObject, workerFromObject } from './tools/serializers'
 
 class GrpcClient {
   client: BrokerClient
-  worker: grpc.ClientDuplexStream<WorkerIn, WorkerOut>
+  worker: grpc.ClientDuplexStream<Worker, Process>
   onMessage: (data: ProcessStateType) => any
+  type: string
+  version: string
+  reconnect: NodeJS.Timeout
 
   constructor() {
     this.client = new BrokerClient('localhost:50051', grpc.credentials.createInsecure())
@@ -19,30 +22,50 @@ class GrpcClient {
     version: string,
   ) => {
     this.onMessage = onMessage
+    this.type = type
+    this.version = version
+    this.connect()
+  }
+
+  private connect = () => {
+    this.reconnect = null
+
     this.worker = this.client.worker()
-    this.worker.on('data', (data: WorkerOut) => {
-      const process = processToObject(data.getMakeStep())
+
+    this.worker.on('data', (data: Process) => {
+      const process = processToObject(data)
       this.onMessage(process)
     })
 
-    const msg = new WorkerIn()
-    msg.setRegisterWorker(
-      workerFromObject({
-        type,
-        version,
-      }),
-    )
+    this.worker.on('close', () => {
+      console.log('closed')
+      this.retry()
+    })
 
-    this.worker.write(msg)
+    this.worker.on('error', (e) => {
+      console.error('error', e)
+      this.retry()
+    })
 
-    return this.worker
+    this.worker.write(workerFromObject({ type: this.type, version: this.version }))
   }
 
-  processStepResult = async (process: ProcessStateType) => {
-    return new Promise((resolve) => {
-      const msg = new WorkerIn()
-      msg.setStepResult(processFromObject(process))
-      this.worker.write(msg, () => resolve(null))
+  private retry = () => {
+    if (!this.reconnect) {
+      console.log('retry in 5s')
+      this.reconnect = setTimeout(this.connect, 5000)
+    }
+  }
+
+  processStepResult = async (data: ProcessStateType) => {
+    return new Promise((resolve, reject) => {
+      this.client.step_result(processFromObject(data), (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(processToObject(data))
+        }
+      })
     })
   }
 
@@ -86,7 +109,7 @@ class GrpcClient {
   }
 
   close = () => {
-    this.worker.end()
+    this.worker.cancel()
   }
 }
 

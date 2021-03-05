@@ -1,5 +1,5 @@
 import BrokerController from './BrokerController'
-import { Worker, WorkerOut } from './proto/model_pb'
+import { Process, Worker } from './proto/model_pb'
 import { processFromObject } from './serializers'
 import { ProcessStateType } from './Types'
 
@@ -7,7 +7,7 @@ type WorkerType = {
   id: string
   type: string
   version: string
-  write: (data: WorkerOut) => boolean
+  write: (data: Process) => boolean
 }
 
 class WorkersManager {
@@ -22,7 +22,7 @@ class WorkersManager {
   addWorker = (
     workerId: string,
     description: Worker.AsObject,
-    write: (data: WorkerOut) => boolean,
+    write: (data: Process) => boolean,
   ) => {
     this.workers.push({
       id: workerId,
@@ -35,8 +35,10 @@ class WorkersManager {
 
   removeWorker = (workerId: string) => {
     const worker = this.getWorkerById(workerId)
-    console.log('worker DISCONNECT', worker.type, worker.version)
-    this.workers = this.workers.filter((w) => w.id !== workerId)
+    if (worker) {
+      console.log('worker DISCONNECT', worker.type, worker.version)
+      this.workers = this.workers.filter((w) => w.id !== workerId)
+    }
   }
 
   getWorkerById = (workerId: string) => {
@@ -55,11 +57,7 @@ class WorkersManager {
       return
     }
 
-    const workerOut = new WorkerOut()
-
-    workerOut.setMakeStep(processFromObject(state))
-
-    worker.write(workerOut)
+    worker.write(processFromObject(state))
   }
 
   getWorkerByType = (type: string, version: string | null): WorkerType | undefined => {
