@@ -3,11 +3,11 @@ import { BrokerService } from './proto/model_grpc_pb'
 import { getBrokerServer } from './BrokerServer'
 import WorkManager from './WorkersManager'
 import BrokerController from './BrokerController'
-import BrokerDb from './BrokerDb'
+import { db } from './db/connection'
 
 async function main() {
-  const db = new BrokerDb()
-  const controller = new BrokerController(db)
+  await db.authenticate()
+  const controller = new BrokerController()
   const workManager = new WorkManager(controller)
   controller.registerWorker(workManager)
   const server = new grpc.Server()

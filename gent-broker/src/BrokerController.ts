@@ -1,6 +1,7 @@
 import BrokerDb from './BrokerDb'
 import { Process } from './proto/model_pb'
 import TasksQueue, { QueueTask } from './TasksQueue'
+import { ProcessStateType } from './Types'
 import WorkersManager from './WorkersManager'
 
 class BrokerController {
@@ -8,12 +9,12 @@ class BrokerController {
   private worker: WorkersManager
   private db: BrokerDb
 
-  constructor(db: BrokerDb) {
+  constructor() {
     this.queue = new TasksQueue(this.processWork)
-    this.db = db
+    this.db = new BrokerDb()
   }
 
-  public processResult = async (state: Process.AsObject) => {
+  public processResult = async (state: ProcessStateType) => {
     const isExisting = Boolean(state.id)
     const result = isExisting
       ? await this.db.updateProcess(state)
@@ -36,7 +37,7 @@ class BrokerController {
 
   private processWork = async (task: QueueTask) => {
     const state = await this.db.getProcess(task.id)
-    const newState: Process.AsObject = {
+    const newState: ProcessStateType = {
       ...state,
       currentTask: state.nextTask,
       currentSubtask: state.nextSubtask,

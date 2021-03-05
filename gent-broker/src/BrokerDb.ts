@@ -1,34 +1,64 @@
-import { Process } from './proto/model_pb'
+import Process, { deserializeProcess } from './db/models/Process'
+import { ProcessStateType } from './Types'
 
 class BrokerDb {
-  private processes: Process.AsObject[] = []
-  private lastId = 0
-
-  createProcess = async (state: Process.AsObject) => {
-    const newProcess = {
-      ...state,
-      id: `proc-${this.lastId++}`,
-    }
-    this.processes.push(newProcess)
-    console.log(`create process ${newProcess.id}`, this.processes)
-    return newProcess
+  createProcess = async (i: ProcessStateType): Promise<ProcessStateType> => {
+    const result = await Process.create({
+      created: i.created ?? new Date(i.created),
+      type: i.type,
+      version: i.version,
+      status: i.status,
+      currentTask: i.currentTask,
+      currentSubtask: i.currentSubtask,
+      currentInput: i.currentInput,
+      nextDeployTime: i.nextDeployTime ?? new Date(i.nextDeployTime),
+      nextTask: i.nextTask,
+      nextSubtask: i.nextSubtask,
+      taskState: i.taskState,
+      state: i.state,
+      input: i.input,
+      output: i.output,
+      error: i.error,
+      tags: i.tags,
+      active: i.active,
+    })
+    return deserializeProcess(result)
   }
 
-  updateProcess = async (state: Process.AsObject) => {
-    const procIndex = this.processes.findIndex((p) => p.id === state.id)
-    this.processes[procIndex] = state
-    console.log(`updateProcess ${state.id}`, this.processes)
-    return state
+  updateProcess = async (i: ProcessStateType) => {
+    const [_, result] = await Process.update(
+      {
+        created: i.created ?? new Date(i.created),
+        type: i.type,
+        version: i.version,
+        status: i.status,
+        currentTask: i.currentTask,
+        currentSubtask: i.currentSubtask,
+        currentInput: i.currentInput,
+        nextDeployTime: i.nextDeployTime ?? new Date(i.nextDeployTime),
+        nextTask: i.nextTask,
+        nextSubtask: i.nextSubtask,
+        taskState: i.taskState,
+        state: i.state,
+        input: i.input,
+        output: i.output,
+        error: i.error,
+        tags: i.tags,
+        active: i.active,
+      },
+      { where: { id: Number(i.id) }, returning: true },
+    )
+    return deserializeProcess(result[0])
   }
 
   getProcess = async (processId: string) => {
-    console.log(`getProcess ${processId}`, this.processes)
-    return this.processes.find((p) => p.id === processId)
+    const result = await Process.findByPk(Number(processId))
+    return deserializeProcess(result)
   }
 
   getAllProcesses = async () => {
-    console.log(`getProcesses`, this.processes)
-    return this.processes
+    const result = await Process.findAll()
+    return result.map(deserializeProcess)
   }
 }
 

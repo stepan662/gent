@@ -1,6 +1,7 @@
 import BrokerController from './BrokerController'
-import { Process, Worker, WorkerOut } from './proto/model_pb'
+import { Worker, WorkerOut } from './proto/model_pb'
 import { processFromObject } from './serializers'
+import { ProcessStateType } from './Types'
 
 type WorkerType = {
   id: string
@@ -42,11 +43,11 @@ class WorkersManager {
     return this.workers.find((w) => w.id === workerId)
   }
 
-  onProcessResult = async (data: Process.AsObject) => {
+  onProcessResult = async (data: ProcessStateType) => {
     return this.controller.processResult(data)
   }
 
-  sendMakeStep = (state: Process.AsObject) => {
+  sendMakeStep = (state: ProcessStateType) => {
     const worker = this.getWorkerByType(state.type, state.version)
 
     if (!worker) {

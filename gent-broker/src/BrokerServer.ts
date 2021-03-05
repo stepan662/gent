@@ -2,7 +2,7 @@ import * as grpc from '@grpc/grpc-js'
 import { Process, WorkerIn, WorkerOut, ProcessId, Processes, Empty } from './proto/model_pb'
 import { IBrokerServer } from './proto/model_grpc_pb'
 import WorkersManager from './WorkersManager'
-import { processFromObject } from './serializers'
+import { processFromObject, processToObject } from './serializers'
 import BrokerController from './BrokerController'
 
 export function getBrokerServer(manager: WorkersManager, controller: BrokerController) {
@@ -11,26 +11,25 @@ export function getBrokerServer(manager: WorkersManager, controller: BrokerContr
 
     worker: grpc.handleBidiStreamingCall<WorkerIn, WorkerOut> = (call) => {
       const workerId = String(Date.now()) + '-' + String(Math.random())
-      call.on('data', (raw: WorkerIn) => {
-        const data = raw.toObject()
+      call.on('data', (data: WorkerIn) => {
         const worker = manager.getWorkerById(workerId)
         if (!worker) {
           // worker is not initialized
-          if (data.registerWorker) {
+          if (data.getRegisterWorker()) {
             // inicializing worker
-            manager.addWorker(workerId, data.registerWorker, call.write.bind(call))
+            manager.addWorker(workerId, data.getRegisterWorker().toObject(), call.write.bind(call))
           } else {
             // unexpected message
             call.destroy(new Error(`Expecting 'registerWorker'`))
           }
         } else {
           // worker is initialized
-          if (data.createProcess) {
+          if (data.getCreateProcess()) {
             // recieving process data
-            manager.onProcessResult(data.createProcess)
-          } else if (data.stepResult) {
+            manager.onProcessResult(processToObject(data.getCreateProcess()))
+          } else if (data.getStepResult) {
             // recieving event data
-            manager.onProcessResult(data.stepResult)
+            manager.onProcessResult(processToObject(data.getStepResult()))
           } else {
             // unexpected message
             call.destroy(new Error(`Expecting message with field 'process' or 'event'`))
@@ -43,12 +42,12 @@ export function getBrokerServer(manager: WorkersManager, controller: BrokerContr
     }
 
     create_process: grpc.handleUnaryCall<Process, Process> = async (call, callback) => {
-      const data = call.request.toObject()
+      const data = processToObject(call.request)
       const process = processFromObject(await manager.onProcessResult(data))
       callback(null, process)
     }
     step_result: grpc.handleUnaryCall<Process, Process> = async (call, callback) => {
-      const data = call.request.toObject()
+      const data = processToObject(call.request)
       const process = processFromObject(await manager.onProcessResult(data))
       callback(null, process)
     }
