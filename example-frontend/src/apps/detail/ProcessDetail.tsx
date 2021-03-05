@@ -29,20 +29,15 @@ const Process = () => {
   const { data: schema, revalidate: schemaRevalidate } = useSWR('/schema', {
     refreshInterval: 10000,
   })
-  const { data: proc } = useSWR(processId && `/state?id=${processId}`, {
+  const { data: state } = useSWR(processId && `/state?id=${processId}`, {
     refreshInterval: 1000,
   })
 
   return (
     <Container>
-      {schema && (
-        <Header>
-          <Button size="small" href={`/history?processId=${processId}`}>
-            Show history
-          </Button>
-        </Header>
-      )}
-      {schema && <GentDiagram schema={schema} state={proc} />}
+      {schema && <GentDiagram schema={schema} state={state} />}
+
+      {schema && state && <pre>{JSON.stringify(state, null, 2)}</pre>}
 
       {/* {proc?.status === 'error' && <ErrorVisualizer state={proc} />} */}
 

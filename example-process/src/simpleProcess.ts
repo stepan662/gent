@@ -2,7 +2,6 @@ import b from 'gent-core/lib/NodeBuilder'
 import * as n from 'gent-core/lib/Node'
 import Process from 'gent-core/lib/Process'
 import { SubtaskResult } from 'gent-core/lib/Subtask'
-import { staged } from 'gent-core/lib/StagedSubtask'
 
 const [start, task] = b.connect(
   // start event
@@ -20,74 +19,53 @@ const [start, task] = b.connect(
   n.task({
     id: 'task',
     name: '3x repeated task',
-    run: staged(async ({ stage, loop }) => {
-      const first = await stage(() => {
-        return new SubtaskResult({
-          taskState: {
-            message: `I'm in stage 1`,
-          },
-          returnData: '1',
-          delay: 5000,
-        })
+    run: ({ state }) => {
+      const round = state?.round || 0
+      return new SubtaskResult({
+        state: {
+          round: round + 1,
+        },
+        delay: 5000,
       })
-
-      const second = await stage(() => {
-        return new SubtaskResult({
-          taskState: {
-            message: `I'm in stage 2`,
-          },
-          returnData: 2,
-        })
-      })
-
-      const loopResult = await loop(({ index }) => {
-        return new SubtaskResult({
-          taskState: {
-            message: `I've looped ${index + 1} time(s)`,
-          },
-          returnData: index < 3 ? null : 'heelo',
-        })
-      })
-
-      const third = await stage(() => {
-        return new SubtaskResult({
-          taskState: {
-            message: `I'm in stage 2`,
-          },
-          returnData: 3,
-          delay: 5000,
-        })
-      })
-
-      console.log(`${first} ${second} ${loopResult} ${third}`)
-    }),
+    },
   }),
 )
 
 const exclusive = task.connect(
   n.exclusive({
     id: 'exclusive',
-    name: 'Exclusive',
-    decide: () => {
+    name: 'How many times has task ran?',
+    decide: ({ state }) => {
       return new SubtaskResult({
-        nextTask: 'end2',
+        nextTask: state.round >= 3 ? 'end' : 'waitTask',
+        delay: 1000,
       })
     },
   }),
 )
 
-exclusive.connect(
-  // end event
-  n.end({
-    id: 'end1',
-    name: 'End',
+const waitTask = exclusive.connect(
+  n.link({ name: '< 3' }),
+  n.task({
+    id: 'waitTask',
+    name: 'Wait 3s',
+    run: () => {
+      return new SubtaskResult({
+        delay: 3000,
+      })
+    },
   }),
 )
 
+waitTask.connect(task)
+
 exclusive.connect(
+  n.link({
+    name: '>= 3',
+  }),
   // end event
   n.end({
-    id: 'end2',
+    id: 'end',
     name: 'End',
   }),
 )

@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.ts",
-    "generate": "sh -e ./generate.sh"
+    "generate": "sh -e ./generate.sh",
+    "db": "pg_ctl -D ./local.db start"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.2.6",

@@ -4,7 +4,7 @@ import { ProcessStateType } from './Types'
 class BrokerDb {
   createProcess = async (i: ProcessStateType): Promise<ProcessStateType> => {
     const result = await Process.create({
-      created: i.created ?? new Date(i.created),
+      created: i.created && new Date(i.created),
       type: i.type,
       version: i.version,
       status: i.status,
@@ -28,7 +28,7 @@ class BrokerDb {
   updateProcess = async (i: ProcessStateType) => {
     const [_, result] = await Process.update(
       {
-        created: i.created ?? new Date(i.created),
+        created: i.created && new Date(i.created),
         type: i.type,
         version: i.version,
         status: i.status,
@@ -57,7 +57,7 @@ class BrokerDb {
   }
 
   getAllProcesses = async () => {
-    const result = await Process.findAll()
+    const result = await Process.findAll({ order: [['id', 'DESC']], limit: 20 })
     return result.map(deserializeProcess)
   }
 }
