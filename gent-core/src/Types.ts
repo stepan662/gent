@@ -110,7 +110,8 @@ export type Connection = LinkType & {
 }
 
 export type ProcessAttributes = {
-  id: string
+  type: string
+  version: string
   name?: string
   description?: string
 }

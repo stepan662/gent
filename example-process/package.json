@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --watch $(realpath node_modules/gent-core)/lib --watch src src/testServer.ts",
+    "dev": "nodemon --watch $(realpath node_modules/gent-core)/lib --watch src -r dotenv/config src/testServer.ts",
     "start": "node build/server.js",
     "mongo:init": "ts-node src/scripts/mongoInit.ts",
     "build": "tsc",

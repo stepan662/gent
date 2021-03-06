@@ -8,11 +8,7 @@ const [start, task] = b.connect(
   n.start({
     id: 'start',
     name: 'Start',
-    init: () => {
-      return new SubtaskResult({
-        delay: 5000,
-      })
-    },
+    init: () => {},
   }),
 
   // task
@@ -72,8 +68,9 @@ exclusive.connect(
 
 export default new Process(
   {
-    id: 'process',
-    name: 'My first process',
+    type: 'process1',
+    version: 'test',
+    name: 'Process 1',
   },
   start,
 )

@@ -8,9 +8,8 @@ class GrpcClient {
   client: BrokerClient
   worker: grpc.ClientDuplexStream<Worker, Process>
   onMessage: (data: ProcessStateType) => any
-  type: string
-  version: string
   reconnect: NodeJS.Timeout
+  types: { type: string; version: string }[]
 
   constructor() {
     this.client = new BrokerClient('localhost:50051', grpc.credentials.createInsecure())
@@ -18,12 +17,10 @@ class GrpcClient {
 
   startWorker = async (
     onMessage: (data: ProcessStateType) => any,
-    type: string,
-    version: string,
+    types: { type: string; version: string }[],
   ) => {
     this.onMessage = onMessage
-    this.type = type
-    this.version = version
+    this.types = types
     this.connect()
   }
 
@@ -47,7 +44,11 @@ class GrpcClient {
       this.retry()
     })
 
-    this.worker.write(workerFromObject({ type: this.type, version: this.version }))
+    console.log(this.types)
+
+    this.types.forEach((t) => {
+      this.worker.write(workerFromObject({ type: t.type, version: t.version }))
+    })
   }
 
   private retry = () => {

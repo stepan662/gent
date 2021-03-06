@@ -13,7 +13,9 @@ class Automat {
     this.debug = debug
   }
 
-  public startProcess = async (initialData: any, type: string, version: string) => {
+  public startProcess = async (initialData: any) => {
+    const type = this.process.attributes.type
+    const version = this.process.attributes.version
     const start = this.process.nodes[0] as StartType
 
     const initState: ProcessStateType = {

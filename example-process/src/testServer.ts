@@ -1,29 +1,25 @@
-import * as dotenv from 'dotenv'
-dotenv.config()
-
 import * as path from 'path'
 import * as express from 'express'
 import * as cors from 'cors'
-import * as swaggerUi from 'swagger-ui-express'
-import * as yaml from 'yamljs'
 
 import GentAutomat from 'gent-core/lib/Automat'
 
 import { OpenApiValidator } from 'express-openapi-validator'
 import { createRouter } from './expressRouter'
-import simpleProcess from './simpleProcess'
+import process1 from './process1'
+import process2 from './process2'
 import GrpcClient from 'gent-core/lib/GrpcClient'
 import { ProcessStateType } from 'gent-core/lib/Types'
 
-const swaggerDocument = yaml.load(path.join(__dirname, '../schema.yaml'))
-
-const automat = new GentAutomat(simpleProcess, true)
+const automat1 = new GentAutomat(process1, true)
+const automat2 = new GentAutomat(process2, true)
+const automats = [automat1, automat2]
 const client = new GrpcClient()
-const gentRouter = createRouter(automat, client)
-
+const gentRouter = createRouter(automats, client)
+const getAutomat = (type: string) => {
+  return automats.find((a) => a.process.attributes.type === type)
+}
 const app = express()
-
-app.use('/ui', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.use(cors())
 
@@ -37,11 +33,18 @@ new OpenApiValidator({
   .install(app)
   .then(() => {
     const onMessage = async (data: ProcessStateType) => {
+      const automat = getAutomat(data.type)
       const result = await automat.step(data)
       await client.processStepResult(result)
     }
 
-    client.startWorker(onMessage, 'test', 'test')
+    client.startWorker(
+      onMessage,
+      automats.map((a) => ({
+        type: a.process.attributes.type,
+        version: a.process.attributes.version,
+      })),
+    )
 
     app.use(gentRouter)
 

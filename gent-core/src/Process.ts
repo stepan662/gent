@@ -75,7 +75,8 @@ class Process {
   public getSchema() {
     return {
       attributes: {
-        id: this.attributes.id,
+        type: this.attributes.type,
+        version: this.attributes.version,
         name: this.attributes.name || null,
         description: this.attributes.description || null,
       },

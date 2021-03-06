@@ -8,21 +8,28 @@ const asyncHandler = (
   return async (req, res, next) => Promise.resolve(func(req, res)).catch((e) => next(e))
 }
 
-export const createRouter = (worker: Automat, client: GrpcClient) => {
+export const createRouter = (automats: Automat[], client: GrpcClient) => {
   // setup router
   const router = express.Router()
+
+  const getAutomat = (type: string) => {
+    return automats.find((a) => a.process.attributes.type === type)
+  }
 
   router.get(
     '/schema',
     asyncHandler(async (req, res) => {
-      res.send(worker.process.getSchema())
+      const type = req.query.type as string
+      res.send(getAutomat(type).process.getSchema())
     }),
   )
 
   router.post(
     '/start',
     asyncHandler(async (req, res) => {
-      const initial = await worker.startProcess(req.body, 'test', 'test')
+      const type = req.query.type as string
+      const automat = getAutomat(type)
+      const initial = await automat.startProcess(req.body)
       const result = await client.createProcess(initial)
       res.send(result)
     }),

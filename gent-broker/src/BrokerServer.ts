@@ -12,9 +12,11 @@ export function getBrokerServer(manager: WorkersManager, controller: BrokerContr
     worker: grpc.handleBidiStreamingCall<Worker, Process> = (call) => {
       const workerId = String(Date.now()) + '-' + String(Math.random())
 
-      call.once('data', (data: Worker) => {
+      manager.addWorker(workerId, call.write.bind(call))
+
+      call.on('data', (data: Worker) => {
         // register only first message from worker, then create worker
-        manager.addWorker(workerId, data.toObject(), call.write.bind(call))
+        manager.addWorkerDescription(workerId, data.toObject())
       })
 
       call.on('end', () => {

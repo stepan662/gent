@@ -1,5 +1,6 @@
 import React from 'react'
 
+import Stack from '@kiwicom/orbit-components/lib/Stack'
 import NewProcessButton from './NewProcessButton'
 import ProcessOverview from './Process'
 import useSWR from 'swr'
@@ -21,7 +22,10 @@ const List = () => {
   return (
     <Container>
       <Wrapper>
-        <NewProcessButton />
+        <Stack direction="row">
+          <NewProcessButton type="process1" label="Process 1" />
+          <NewProcessButton type="process2" label="Process 2" />
+        </Stack>
 
         <h2>Processes: </h2>
         {data && data.payload.map((process) => <ProcessOverview key={process.id} data={process} />)}

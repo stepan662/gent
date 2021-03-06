@@ -5,7 +5,12 @@ import client from '../../client'
 import { mutate } from 'swr'
 import { useRouter } from 'next/router'
 
-const NewProcessButton = () => {
+type Props = {
+  type: string
+  label: string
+}
+
+const NewProcessButton: React.FC<Props> = ({ type, label }) => {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const createNewProcess = async () => {
@@ -13,7 +18,7 @@ const NewProcessButton = () => {
     if (bid) {
       setLoading(true)
       try {
-        const data = await client.post('/start')
+        const data = await client.post(`/start?type=${type}`)
         mutate(`/state?id=${data.id}`, data)
         router.push(`/process?processId=${data.id}`)
       } catch (e) {
@@ -24,7 +29,7 @@ const NewProcessButton = () => {
   }
   return (
     <Button loading={loading} onClick={createNewProcess}>
-      New process
+      {label}
     </Button>
   )
 }

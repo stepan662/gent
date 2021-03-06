@@ -3,11 +3,15 @@ import { Process, Worker } from './proto/model_pb'
 import { processFromObject } from './serializers'
 import { ProcessStateType } from './Types'
 
-type WorkerType = {
-  id: string
+type ProcessType = {
   type: string
   version: string
+}
+
+type WorkerType = {
+  id: string
   write: (data: Process) => boolean
+  types: ProcessType[]
 }
 
 class WorkersManager {
@@ -19,24 +23,27 @@ class WorkersManager {
     this.controller = controller
   }
 
-  addWorker = (
-    workerId: string,
-    description: Worker.AsObject,
-    write: (data: Process) => boolean,
-  ) => {
+  addWorker = (workerId: string, write: (data: Process) => boolean) => {
     this.workers.push({
       id: workerId,
-      type: description.type,
-      version: description.version,
+      types: [],
       write,
     })
-    console.log('worker CONNECT', description.type, description.version)
+    console.log('worker CONNECT', workerId)
+  }
+
+  addWorkerDescription = (workerId: string, description: Worker.AsObject) => {
+    const worker = this.getWorkerById(workerId)
+    if (worker) {
+      worker.types.push({ type: description.type, version: description.version })
+    }
+    console.log('worker ADDED DESCRIPTION', workerId, description.type, description.version)
   }
 
   removeWorker = (workerId: string) => {
     const worker = this.getWorkerById(workerId)
     if (worker) {
-      console.log('worker DISCONNECT', worker.type, worker.version)
+      console.log('worker DISCONNECT', worker.id)
       this.workers = this.workers.filter((w) => w.id !== workerId)
     }
   }
@@ -61,7 +68,9 @@ class WorkersManager {
   }
 
   getWorkerByType = (type: string, version: string | null): WorkerType | undefined => {
-    return this.workers.find((w) => w.type === type && (version === null || w.version === version))
+    return this.workers.find((w) =>
+      w.types.map((d) => d.type === type && (version === null || d.version === version)),
+    )
   }
 }
 

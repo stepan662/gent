@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import Link from 'next/link'
+import Stack from '@kiwicom/orbit-components/lib/Stack'
 
 const StyledLink = styled.a`
   display: flex;
@@ -9,16 +10,9 @@ const StyledLink = styled.a`
   margin: 5px;
 `
 
-const ProcessId = styled.div`
+const RowItem = styled.div`
   display: flex;
   font-size: 14px;
-  flex-basis: 400px;
-`
-
-const ProcessStatus = styled.div`
-  display: flex;
-  font-size: 13px;
-  flex-basis: 200px;
 `
 
 function actionToState(action) {
@@ -30,8 +24,11 @@ const ProcessOverview = ({ data }) => {
     <div>
       <Link href={`/process?processId=${data.id}`} passHref>
         <StyledLink>
-          <ProcessId>Id: {data.id}</ProcessId>
-          <ProcessStatus>{actionToState(data.status)}</ProcessStatus>
+          <Stack direction="row" justify="between">
+            <RowItem>Id: {data.id}</RowItem>
+            <RowItem>type: {data.type}</RowItem>
+            <RowItem>{actionToState(data.status)}</RowItem>
+          </Stack>
         </StyledLink>
       </Link>
     </div>

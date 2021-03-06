@@ -5,8 +5,8 @@ import GentDiagram from 'gent-diagram'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 
-// import ErrorVisualizer from '../../components/ErrorVisualizer'
-import Button from '@kiwicom/orbit-components/lib/Button'
+import Stack from '@kiwicom/orbit-components/lib/Stack'
+import Heading from '@kiwicom/orbit-components/lib/Heading'
 
 const Container = styled.div`
   width: 1000px;
@@ -26,16 +26,25 @@ const Process = () => {
 
   const { processId } = router.query
 
-  const { data: schema, revalidate: schemaRevalidate } = useSWR('/schema', {
-    refreshInterval: 10000,
-  })
   const { data: state } = useSWR(processId && `/state?id=${processId}`, {
     refreshInterval: 1000,
   })
 
+  const { data: schema, revalidate: schemaRevalidate } = useSWR(
+    state && `/schema?type=${state.type}`,
+    {
+      refreshInterval: 10000,
+    },
+  )
+
   return (
     <Container>
-      {schema && <GentDiagram schema={schema} state={state} />}
+      {schema && (
+        <Stack>
+          <Heading>{schema.attributes.name}</Heading>
+          <GentDiagram schema={schema} state={state} />
+        </Stack>
+      )}
 
       {schema && state && <pre>{JSON.stringify(state, null, 2)}</pre>}
 
