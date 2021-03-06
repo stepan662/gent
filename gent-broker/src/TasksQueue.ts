@@ -7,7 +7,7 @@ class TasksQueue {
   private tasks: QueueTask[]
   private scheduledTimeout: NodeJS.Timeout = null
 
-  constructor(private onWork: (process: QueueTask) => void) {
+  constructor(private onWork: (processId: string) => void) {
     this.onWork = onWork
     this.tasks = []
     setTimeout(this.reschedule, 1000)
@@ -15,7 +15,7 @@ class TasksQueue {
 
   add = (task: QueueTask) => {
     if (!task.time) {
-      this.onWork(task)
+      this.onWork(task.id)
     } else {
       this.tasks.push(task)
       this.tasks.sort((a, b) => {
@@ -64,12 +64,12 @@ class TasksQueue {
   private workOnQueue = () => {
     const now = Date.now()
 
-    let workableTasks = []
+    let workableTasks: QueueTask[] = []
     while (this.tasks.length > 0 && this.tasks[0].time < now) {
       const process = this.tasks.shift()
       workableTasks.push(process)
     }
-    workableTasks.forEach(this.onWork)
+    workableTasks.forEach((t) => this.onWork(t.id))
 
     this.reschedule()
   }

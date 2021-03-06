@@ -15,13 +15,13 @@ const [start, task] = b.connect(
   n.task({
     id: 'task',
     name: '3x repeated task',
-    run: ({ state }) => {
+    run: async ({ state }) => {
+      await new Promise((resolve) => setTimeout(resolve, 5000))
       const round = state?.round || 0
       return new SubtaskResult({
         state: {
           round: round + 1,
         },
-        delay: 5000,
       })
     },
   }),

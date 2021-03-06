@@ -1,5 +1,13 @@
-import { Process, ProcessInput, ProcessError, Worker } from '../proto/model_pb'
-import { ProcessStateType } from '../Types'
+import {
+  Process,
+  ProcessError,
+  Worker,
+  ExternalAction,
+  ProcessInput,
+  ProcessIdentity,
+  ProcessExternalResponse,
+} from './proto/model_pb'
+import { ExternalActionType, ProcessStateType } from './Types'
 
 export function processFromObject(i: ProcessStateType) {
   const result = new Process()
@@ -20,19 +28,26 @@ export function processFromObject(i: ProcessStateType) {
   i.state && result.setState(JSON.stringify(i.state))
   i.input && result.setInput(JSON.stringify(i.input))
   i.output && result.setOutput(JSON.stringify(i.output))
-  result.setError(processErrorFromObject(i.error || ({} as any)))
+  if (i.error) {
+    result.setError(processErrorFromObject(i.error))
+  }
   result.setTagsList(i.tags)
+  if (i.caller) {
+    result.setCaller(processIdentityFromObject(i.caller))
+  }
+  result.setActionsList(i.actions && i.actions.map(externalActionFromObject))
 
   return result
 }
 
 export function processToObject(i: Process): ProcessStateType {
-  const error = i.getError().toObject()
+  const error = i.getError()?.toObject()
   const taskState = i.getTaskState()
   const currentInput = i.getCurrentInput()
   const state = i.getState()
   const input = i.getInput()
   const output = i.getOutput()
+  const caller = i.getCaller()?.toObject()
   return {
     id: i.getId(),
     created: i.getCreated(),
@@ -50,20 +65,60 @@ export function processToObject(i: Process): ProcessStateType {
     state: state && JSON.parse(state),
     input: input && JSON.parse(input),
     output: output && JSON.parse(output),
-    error: error.name ? error : null,
+    error: error || null,
     tags: i.getTagsList(),
+    caller: caller || null,
+    actions: i.getActionsList() && i.getActionsList().map(externalActionToObject),
   }
 }
 
-export function processInputFromObject(input: ProcessInput.AsObject) {
-  const result = new ProcessInput()
+export function externalActionToObject(input: ExternalAction): ExternalActionType {
+  if (input.hasProcessStart()) {
+    return {
+      type: 'processStart',
+      data: input.getProcessStart().toObject(),
+    }
+  } else {
+    return {
+      type: 'processResponse',
+      data: input.getProcessResponse().toObject(),
+    }
+  }
+}
 
-  result.setCaller(input.caller)
-  result.setType(input.type)
-  result.setVersion(input.version)
-  result.setInput(input.input)
+export function externalActionFromObject(i: ExternalActionType): ExternalAction {
+  const result = new ExternalAction()
+  if (i.type === 'processStart') {
+    const p = new ProcessInput()
+    if (i.data.caller) {
+      p.setType(i.data.type)
+      p.setVersion(i.data.version)
+      p.setCaller(processIdentityFromObject(i.data.caller))
+    }
+    p.setInput(i.data.input)
+    result.setProcessStart(p)
+  } else {
+    const r = new ProcessExternalResponse()
+    if (i.data.caller) {
+      r.setCaller(processIdentityFromObject(i.data.caller))
+    }
+    r.setOutput(i.data.output)
+    r.setStatus(i.data.status)
+    result.setProcessResponse(r)
+  }
 
   return result
+}
+
+export function processIdentityFromObject(i: ProcessIdentity.AsObject): ProcessIdentity {
+  const c = new ProcessIdentity()
+  c.setId(i.id)
+  c.setType(i.type)
+  c.setVersion(i.version)
+  c.setTask(i.task)
+  c.setSubtask(i.subtask)
+  c.setSubprocess(i.subprocess)
+  return c
 }
 
 export function workerFromObject(input: Worker.AsObject) {

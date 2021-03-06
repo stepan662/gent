@@ -1,4 +1,4 @@
-import { ProcessStateType } from './Types'
+import { ExternalActionType, ProcessStateType } from './Types'
 
 type SubtaskResultType<T> = {
   taskState?: any
@@ -7,6 +7,7 @@ type SubtaskResultType<T> = {
   nextSubtask?: string
   delay?: number
   pause?: boolean
+  externalActions?: ExternalActionType[]
   returnData?: T
 }
 
@@ -17,6 +18,7 @@ export class SubtaskResult<T = any> implements SubtaskResultType<T> {
   nextSubtask?: string
   delay?: number
   pause?: boolean
+  externalActions: ExternalActionType[]
   returnData?: T
 
   constructor(options: SubtaskResultType<T>) {
@@ -26,6 +28,7 @@ export class SubtaskResult<T = any> implements SubtaskResultType<T> {
     this.nextSubtask = options.nextSubtask
     this.delay = options.delay
     this.pause = options.pause
+    this.externalActions = options.externalActions
     this.returnData = options.returnData
   }
 }

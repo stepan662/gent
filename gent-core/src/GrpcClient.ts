@@ -2,7 +2,7 @@ import * as grpc from '@grpc/grpc-js'
 import { BrokerClient } from './proto/model_grpc_pb'
 import { Worker, Process, ProcessId, Empty } from './proto/model_pb'
 import { ProcessStateType } from './Types'
-import { processFromObject, processToObject, workerFromObject } from './tools/serializers'
+import { processFromObject, processToObject, workerFromObject } from './serializers'
 
 class GrpcClient {
   client: BrokerClient
@@ -43,8 +43,6 @@ class GrpcClient {
       console.error('error', e)
       this.retry()
     })
-
-    console.log(this.types)
 
     this.types.forEach((t) => {
       this.worker.write(workerFromObject({ type: t.type, version: t.version }))

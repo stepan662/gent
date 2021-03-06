@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.ts",
     "generate": "sh -e ./generate.sh",
-    "db": "pg_ctl -D ./local.db start"
+    "db": "pg_ctl -D ./local.db start",
+    "db:sync": "ts-node -r dotenv/config src/db/sync.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.2.6",

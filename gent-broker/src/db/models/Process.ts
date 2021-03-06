@@ -20,6 +20,8 @@ const Process = db.define('Process', {
   error: DataTypes.JSONB,
   tags: DataTypes.ARRAY(DataTypes.STRING),
   active: DataTypes.BOOLEAN,
+  caller: DataTypes.JSONB,
+  actions: DataTypes.ARRAY(DataTypes.JSONB),
 })
 
 export function deserializeProcess(i: any): ProcessStateType {
@@ -42,6 +44,8 @@ export function deserializeProcess(i: any): ProcessStateType {
     error: i.error,
     tags: i.tags,
     active: i.active,
+    caller: i.caller,
+    actions: i.actions,
   }
 }
 

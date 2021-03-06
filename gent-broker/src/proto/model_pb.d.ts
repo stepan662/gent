@@ -27,18 +27,60 @@ export namespace Worker {
   }
 }
 
-export class ProcessInput extends jspb.Message {
+export class ProcessIdentity extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
+
+  getTask(): string;
+  setTask(value: string): void;
+
+  getSubtask(): string;
+  setSubtask(value: string): void;
+
   getType(): string;
   setType(value: string): void;
 
   getVersion(): string;
   setVersion(value: string): void;
 
-  getCaller(): string;
-  setCaller(value: string): void;
+  getSubprocess(): boolean;
+  setSubprocess(value: boolean): void;
 
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProcessIdentity.AsObject;
+  static toObject(includeInstance: boolean, msg: ProcessIdentity): ProcessIdentity.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProcessIdentity, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProcessIdentity;
+  static deserializeBinaryFromReader(message: ProcessIdentity, reader: jspb.BinaryReader): ProcessIdentity;
+}
+
+export namespace ProcessIdentity {
+  export type AsObject = {
+    id: string,
+    task: string,
+    subtask: string,
+    type: string,
+    version: string,
+    subprocess: boolean,
+  }
+}
+
+export class ProcessInput extends jspb.Message {
   getInput(): string;
   setInput(value: string): void;
+
+  getType(): string;
+  setType(value: string): void;
+
+  getVersion(): string;
+  setVersion(value: string): void;
+
+  hasCaller(): boolean;
+  clearCaller(): void;
+  getCaller(): ProcessIdentity | undefined;
+  setCaller(value?: ProcessIdentity): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ProcessInput.AsObject;
@@ -52,10 +94,40 @@ export class ProcessInput extends jspb.Message {
 
 export namespace ProcessInput {
   export type AsObject = {
+    input: string,
     type: string,
     version: string,
-    caller: string,
-    input: string,
+    caller?: ProcessIdentity.AsObject,
+  }
+}
+
+export class ProcessExternalResponse extends jspb.Message {
+  getStatus(): string;
+  setStatus(value: string): void;
+
+  getOutput(): string;
+  setOutput(value: string): void;
+
+  hasCaller(): boolean;
+  clearCaller(): void;
+  getCaller(): ProcessIdentity | undefined;
+  setCaller(value?: ProcessIdentity): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ProcessExternalResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ProcessExternalResponse): ProcessExternalResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ProcessExternalResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProcessExternalResponse;
+  static deserializeBinaryFromReader(message: ProcessExternalResponse, reader: jspb.BinaryReader): ProcessExternalResponse;
+}
+
+export namespace ProcessExternalResponse {
+  export type AsObject = {
+    status: string,
+    output: string,
+    caller?: ProcessIdentity.AsObject,
   }
 }
 
@@ -146,6 +218,16 @@ export class Process extends jspb.Message {
   getActive(): boolean;
   setActive(value: boolean): void;
 
+  hasCaller(): boolean;
+  clearCaller(): void;
+  getCaller(): ProcessIdentity | undefined;
+  setCaller(value?: ProcessIdentity): void;
+
+  clearActionsList(): void;
+  getActionsList(): Array<ExternalAction>;
+  setActionsList(value: Array<ExternalAction>): void;
+  addActions(value?: ExternalAction, index?: number): ExternalAction;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Process.AsObject;
   static toObject(includeInstance: boolean, msg: Process): Process.AsObject;
@@ -176,6 +258,43 @@ export namespace Process {
     error?: ProcessError.AsObject,
     tagsList: Array<string>,
     active: boolean,
+    caller?: ProcessIdentity.AsObject,
+    actionsList: Array<ExternalAction.AsObject>,
+  }
+}
+
+export class ExternalAction extends jspb.Message {
+  hasProcessStart(): boolean;
+  clearProcessStart(): void;
+  getProcessStart(): ProcessInput | undefined;
+  setProcessStart(value?: ProcessInput): void;
+
+  hasProcessResponse(): boolean;
+  clearProcessResponse(): void;
+  getProcessResponse(): ProcessExternalResponse | undefined;
+  setProcessResponse(value?: ProcessExternalResponse): void;
+
+  getActionCase(): ExternalAction.ActionCase;
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ExternalAction.AsObject;
+  static toObject(includeInstance: boolean, msg: ExternalAction): ExternalAction.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ExternalAction, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ExternalAction;
+  static deserializeBinaryFromReader(message: ExternalAction, reader: jspb.BinaryReader): ExternalAction;
+}
+
+export namespace ExternalAction {
+  export type AsObject = {
+    processStart?: ProcessInput.AsObject,
+    processResponse?: ProcessExternalResponse.AsObject,
+  }
+
+  export enum ActionCase {
+    ACTION_NOT_SET = 0,
+    PROCESS_START = 1,
+    PROCESS_RESPONSE = 2,
   }
 }
 

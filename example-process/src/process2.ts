@@ -15,15 +15,7 @@ const [start, task] = b.connect(
   n.task({
     id: 'task',
     name: 'Simple task',
-    run: ({ state }) => {
-      const round = state?.round || 0
-      return new SubtaskResult({
-        state: {
-          round: round + 1,
-        },
-        delay: 5000,
-      })
-    },
+    run: () => {},
   }),
 )
 
@@ -32,6 +24,32 @@ task.connect(
   n.end({
     id: 'end',
     name: 'End',
+    finish: ({ id, currentSubtask, currentTask, type, version, currentInput }) => {
+      if (!currentInput._results) {
+        return new SubtaskResult({
+          externalActions: [
+            {
+              type: 'processStart',
+              data: {
+                type: 'process1',
+                version: 'test',
+                caller: {
+                  id,
+                  type,
+                  version,
+                  task: currentTask,
+                  subtask: currentSubtask,
+                  subprocess: false,
+                },
+                input: null,
+              },
+            },
+          ],
+          nextSubtask: currentSubtask,
+          taskState: { finished: true },
+        })
+      }
+    },
   }),
 )
 

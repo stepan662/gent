@@ -21,6 +21,8 @@ class BrokerDb {
       error: i.error,
       tags: i.tags,
       active: i.active,
+      caller: i.caller,
+      actions: i.actions,
     })
     return deserializeProcess(result)
   }
@@ -45,6 +47,8 @@ class BrokerDb {
         error: i.error,
         tags: i.tags,
         active: i.active,
+        caller: i.caller,
+        actions: i.actions,
       },
       { where: { id: Number(i.id) }, returning: true },
     )

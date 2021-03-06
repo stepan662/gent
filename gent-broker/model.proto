@@ -5,11 +5,26 @@ message Worker {
   string version = 2;
 }
 
+message ProcessIdentity {
+  string id = 1;
+  string task = 2;
+  string subtask = 3;
+  string type = 4;
+  string version = 5;
+  bool subprocess = 6;
+}
+
 message ProcessInput {
-  string type = 1;
-  string version = 2;
-  string caller = 3;
-  string input = 4;
+  string input = 1;
+  string type = 2;
+  string version = 3;
+  ProcessIdentity caller = 4;
+}
+
+message ProcessExternalResponse {
+  string status = 1;
+  string output = 2;
+  ProcessIdentity caller = 3;
 }
 
 message ProcessError {
@@ -37,6 +52,15 @@ message Process {
   ProcessError error = 16;
   repeated string tags = 17;
   bool active = 18;
+  ProcessIdentity caller = 19;
+  repeated ExternalAction actions = 20;
+}
+
+message ExternalAction {
+  oneof action {
+    ProcessInput process_start = 1;
+    ProcessExternalResponse process_response = 2;
+  }
 }
 
 message Processes {

@@ -39,7 +39,10 @@ export const start = (props?: StartInput): StartType => {
   }
 }
 
-export const end = (props?: ElementInput): EndType => {
+type EndInput = ElementInput & {
+  finish?: SubtaskType
+}
+export const end = (props?: EndInput): EndType => {
   return {
     _first: 'finish',
     finish: () => {},

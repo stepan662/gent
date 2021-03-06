@@ -37,6 +37,8 @@ class Automat {
       error: null,
       tags: [],
       active: null,
+      caller: null,
+      actions: [],
     }
 
     return this.step(initState)
@@ -49,7 +51,7 @@ class Automat {
       const rawResult = await task[state.currentSubtask]({ ...state })
       const result = this.getResult(task, rawResult)
 
-      if (!result.nextTask && task.type === 'end') {
+      if (!result.nextSubtask && task.type === 'end') {
         return {
           ...state,
           status: 'finished',
@@ -62,6 +64,7 @@ class Automat {
           nextDeployTime: result.deployTime,
           state: result.state || state.state,
           taskState: result.isNewTask ? null : result.taskState || state.taskState,
+          actions: result.externalActions || [],
         }
       }
     } catch (e) {
@@ -77,7 +80,8 @@ class Automat {
     node: NodeType,
     rawResult: any,
   ): SubtaskResult & { isNewTask: boolean; deployTime: number } {
-    const result = rawResult instanceof SubtaskResult ? rawResult : { state: rawResult }
+    const result =
+      rawResult instanceof SubtaskResult ? rawResult : new SubtaskResult({ state: rawResult })
 
     let nextTask: string
     let nextSubtask: string
