@@ -21,7 +21,7 @@ const Process = db.define('Process', {
   tags: DataTypes.ARRAY(DataTypes.STRING),
   active: DataTypes.BOOLEAN,
   caller: DataTypes.JSONB,
-  actions: DataTypes.ARRAY(DataTypes.JSONB),
+  subProcesses: DataTypes.ARRAY(DataTypes.JSONB),
 })
 
 export function deserializeProcess(i: any): ProcessStateType {
@@ -45,7 +45,7 @@ export function deserializeProcess(i: any): ProcessStateType {
     tags: i.tags,
     active: i.active,
     caller: i.caller,
-    actions: i.actions,
+    subProcesses: i.subProcesses,
   }
 }
 

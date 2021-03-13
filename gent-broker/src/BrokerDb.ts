@@ -22,7 +22,7 @@ class BrokerDb {
       tags: i.tags,
       active: i.active,
       caller: i.caller,
-      actions: i.actions,
+      subProcesses: i.subProcesses,
     })
     return deserializeProcess(result)
   }
@@ -48,7 +48,7 @@ class BrokerDb {
         tags: i.tags,
         active: i.active,
         caller: i.caller,
-        actions: i.actions,
+        subProcesses: i.subProcesses,
       },
       { where: { id: Number(i.id) }, returning: true },
     )

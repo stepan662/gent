@@ -2,7 +2,6 @@ import { ProcessStateType, StartType, NodeType } from './Types'
 
 import Process from './Process'
 import { SubtaskResult } from './Subtask'
-import { stringify } from 'querystring'
 
 class Automat {
   process: Process
@@ -30,15 +29,15 @@ class Automat {
       nextTask: null,
       nextSubtask: null,
       nextDeployTime: null,
-      taskState: null,
-      state: null,
+      taskState: {},
+      state: {},
       input: initialData,
       output: null,
       error: null,
       tags: [],
       active: null,
       caller: null,
-      actions: [],
+      subProcesses: [],
     }
 
     return this.step(initState)
@@ -48,24 +47,23 @@ class Automat {
     const task = this.process.getNode(state.currentTask)
 
     try {
+      if (!state.currentTask || !state.currentSubtask) {
+        throw new Error('Recieved state without clear target')
+      }
       const rawResult = await task[state.currentSubtask]({ ...state })
       const result = this.getResult(task, rawResult)
 
-      if (!result.nextSubtask && task.type === 'end') {
-        return {
-          ...state,
-          status: 'finished',
-        }
-      } else {
-        return {
-          ...state,
-          nextTask: result.nextTask,
-          nextSubtask: result.nextSubtask,
-          nextDeployTime: result.deployTime,
-          state: result.state || state.state,
-          taskState: result.isNewTask ? null : result.taskState || state.taskState,
-          actions: result.externalActions || [],
-        }
+      const status = !result.nextSubtask && task.type === 'end' ? 'finished' : 'running'
+
+      return {
+        ...state,
+        nextTask: result.nextTask,
+        nextSubtask: result.nextSubtask,
+        nextDeployTime: result.deployTime,
+        state: { ...state.state, ...result.state },
+        taskState: result.isNewTask ? {} : { ...state.taskState, ...result.taskState },
+        subProcesses: [...state.subProcesses, ...(result.subProcesses || [])],
+        status,
       }
     } catch (e) {
       return {

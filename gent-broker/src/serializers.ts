@@ -1,13 +1,5 @@
-import {
-  Process,
-  ProcessError,
-  Worker,
-  ExternalAction,
-  ProcessInput,
-  ProcessIdentity,
-  ProcessExternalResponse,
-} from './proto/model_pb'
-import { ExternalActionType, ProcessStateType } from './Types'
+import { Process, ProcessError, Worker, SubProcess, Caller } from './proto/model_pb'
+import { SubProcessType, ProcessStateType, CallerType } from './Types'
 
 export function processFromObject(i: ProcessStateType) {
   const result = new Process()
@@ -33,9 +25,9 @@ export function processFromObject(i: ProcessStateType) {
   }
   result.setTagsList(i.tags)
   if (i.caller) {
-    result.setCaller(processIdentityFromObject(i.caller))
+    result.setCaller(callerFromObject(i.caller))
   }
-  result.setActionsList(i.actions && i.actions.map(externalActionFromObject))
+  result.setSubProcessesList(i.subProcesses && i.subProcesses.map(subProcessFromObject))
 
   return result
 }
@@ -47,7 +39,7 @@ export function processToObject(i: Process): ProcessStateType {
   const state = i.getState()
   const input = i.getInput()
   const output = i.getOutput()
-  const caller = i.getCaller()?.toObject()
+  const caller = i.getCaller()
   return {
     id: i.getId(),
     created: i.getCreated(),
@@ -67,58 +59,53 @@ export function processToObject(i: Process): ProcessStateType {
     output: output && JSON.parse(output),
     error: error || null,
     tags: i.getTagsList(),
-    caller: caller || null,
-    actions: i.getActionsList() && i.getActionsList().map(externalActionToObject),
+    caller: caller && callerToObject(caller),
+    subProcesses: i.getSubProcessesList() && i.getSubProcessesList().map(subProcessToObject),
   }
 }
 
-export function externalActionToObject(input: ExternalAction): ExternalActionType {
-  if (input.hasProcessStart()) {
-    return {
-      type: 'processStart',
-      data: input.getProcessStart().toObject(),
-    }
-  } else {
-    return {
-      type: 'processResponse',
-      data: input.getProcessResponse().toObject(),
-    }
+export function subProcessFromObject(i: SubProcessType): SubProcess {
+  const p = new SubProcess()
+  p.setId(i.id)
+  p.setStatus(i.status)
+  p.setInput(i.input)
+  p.setType(i.type)
+  p.setVersion(i.version)
+  p.setReply(i.reply)
+  return p
+}
+
+export function subProcessToObject(i: SubProcess): SubProcessType {
+  return {
+    id: i.getId(),
+    status: i.getStatus() as any,
+    input: i.getInput(),
+    type: i.getType(),
+    version: i.getVersion(),
+    reply: i.getReply(),
   }
 }
 
-export function externalActionFromObject(i: ExternalActionType): ExternalAction {
-  const result = new ExternalAction()
-  if (i.type === 'processStart') {
-    const p = new ProcessInput()
-    if (i.data.caller) {
-      p.setType(i.data.type)
-      p.setVersion(i.data.version)
-      p.setCaller(processIdentityFromObject(i.data.caller))
-    }
-    p.setInput(i.data.input)
-    result.setProcessStart(p)
-  } else {
-    const r = new ProcessExternalResponse()
-    if (i.data.caller) {
-      r.setCaller(processIdentityFromObject(i.data.caller))
-    }
-    r.setOutput(i.data.output)
-    r.setStatus(i.data.status)
-    result.setProcessResponse(r)
-  }
-
-  return result
-}
-
-export function processIdentityFromObject(i: ProcessIdentity.AsObject): ProcessIdentity {
-  const c = new ProcessIdentity()
+export function callerFromObject(i: CallerType): Caller {
+  const c = new Caller()
   c.setId(i.id)
   c.setType(i.type)
   c.setVersion(i.version)
   c.setTask(i.task)
   c.setSubtask(i.subtask)
-  c.setSubprocess(i.subprocess)
+  c.setReply(i.reply)
   return c
+}
+
+export function callerToObject(i: Caller): CallerType {
+  return {
+    id: i.getId(),
+    type: i.getType(),
+    version: i.getVersion(),
+    task: i.getTask(),
+    subtask: i.getSubtask(),
+    reply: i.getReply(),
+  }
 }
 
 export function workerFromObject(input: Worker.AsObject) {

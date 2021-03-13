@@ -24,31 +24,19 @@ task.connect(
   n.end({
     id: 'end',
     name: 'End',
-    finish: ({ id, currentSubtask, currentTask, type, version, currentInput }) => {
-      if (!currentInput._results) {
-        return new SubtaskResult({
-          externalActions: [
-            {
-              type: 'processStart',
-              data: {
-                type: 'process1',
-                version: 'test',
-                caller: {
-                  id,
-                  type,
-                  version,
-                  task: currentTask,
-                  subtask: currentSubtask,
-                  subprocess: false,
-                },
-                input: null,
-              },
-            },
-          ],
-          nextSubtask: currentSubtask,
-          taskState: { finished: true },
-        })
-      }
+    finish: () => {
+      return new SubtaskResult({
+        subProcesses: [
+          {
+            id: null,
+            status: 'init',
+            type: 'process1',
+            version: 'test',
+            input: null,
+            reply: false,
+          },
+        ],
+      })
     },
   }),
 )

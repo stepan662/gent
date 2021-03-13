@@ -1,7 +1,6 @@
 import BrokerDb from './BrokerDb'
-import { ProcessInput } from './proto/model_pb'
-import TasksQueue, { QueueTask } from './TasksQueue'
-import { ExternalActionType, ProcessStateType } from './Types'
+import TasksQueue from './TasksQueue'
+import { ProcessStateType, SubProcessType } from './Types'
 import WorkersManager from './WorkersManager'
 
 class BrokerController {
@@ -17,24 +16,57 @@ class BrokerController {
   public processResult = async (state: ProcessStateType) => {
     const isExisting = Boolean(state.id)
 
-    const result = isExisting
-      ? await this.db.updateProcess({ ...state, active: false })
-      : await this.db.createProcess({ ...state, active: false })
+    let result: ProcessStateType
+    if (isExisting) {
+      const updatedState = await this.dealWithSubProcesses(state)
+      result = await this.db.updateProcess({ ...updatedState, active: false })
+    } else {
+      result = await this.db.createProcess({ ...state, active: false })
+    }
 
-    if (state.actions.length > 0) {
-      const results = await Promise.all(state.actions.map(this.handleExternalAction))
-      setTimeout(
-        () =>
-          this.processWork(result.id, {
-            _results: results,
-          }),
-        0,
-      )
-    } else if (result.status === 'running') {
+    if (state.status === 'running') {
       this.queue.add({ id: result.id, time: result.nextDeployTime })
     }
 
     return result
+  }
+
+  private dealWithSubProcesses = async (state: ProcessStateType): Promise<ProcessStateType> => {
+    let subProcesses = state.subProcesses
+    let currentInput = null
+
+    const newSubprocesses = state.subProcesses.filter((sp) => sp.status === 'init')
+
+    if (newSubprocesses.length > 0) {
+      const startedIds = await Promise.all(
+        newSubprocesses.map((sp) => this.startProcess(sp, state)),
+      )
+      let index = 0
+      subProcesses = subProcesses.map((sp) => {
+        if (sp.status === 'init') {
+          const id = startedIds[index++]
+          return {
+            ...sp,
+            id,
+            input: null,
+            status: 'running',
+          }
+        } else {
+          return sp
+        }
+      })
+      if (state.nextTask === state.currentTask && state.nextSubtask === state.currentSubtask) {
+        currentInput = {
+          started: startedIds,
+        }
+      }
+    }
+
+    return {
+      ...state,
+      subProcesses,
+      currentInput,
+    }
   }
 
   public getProcess = async (processId: string) => {
@@ -45,8 +77,9 @@ class BrokerController {
     return this.db.getAllProcesses()
   }
 
-  private processWork = async (processId: string, input?: any) => {
+  private processWork = async (processId: string) => {
     const state = await this.db.getProcess(processId)
+
     const newState: ProcessStateType = {
       ...state,
       currentTask: state.nextTask,
@@ -55,21 +88,13 @@ class BrokerController {
       nextSubtask: null,
       nextDeployTime: null,
       active: true,
-      currentInput: input || null,
-      actions: [],
     }
 
     const result = await this.db.updateProcess(newState)
     this.worker.sendMakeStep(result)
   }
 
-  private handleExternalAction = (action: ExternalActionType) => {
-    if (action.type === 'processStart') {
-      return this.startProcess(action.data)
-    }
-  }
-
-  private startProcess = async (input: ProcessInput.AsObject) => {
+  private startProcess = async (input: SubProcessType, caller: ProcessStateType) => {
     const newProcess: ProcessStateType = {
       id: null,
       created: Date.now(),
@@ -89,12 +114,19 @@ class BrokerController {
       error: null,
       tags: [],
       active: false,
-      caller: input.caller,
-      actions: [],
+      caller: {
+        id: caller.id,
+        task: caller.currentTask,
+        subtask: caller.currentSubtask,
+        type: caller.type,
+        version: caller.version,
+        reply: input.reply,
+      },
+      subProcesses: [],
     }
     const result = await this.db.createProcess(newProcess)
     this.queue.add({ id: result.id, time: result.nextDeployTime })
-    return { type: 'processStart', id: result.id, status: 'running' }
+    return result.id
   }
 
   public registerWorker = (worker: WorkersManager) => {

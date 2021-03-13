@@ -1,5 +1,3 @@
-import { ProcessExternalResponse, ProcessInput } from './proto/model_pb'
-
 /*
  *  Process state
  */
@@ -22,28 +20,27 @@ export type ProcessStateType = {
   error?: ProcessErrorType
   tags: string[]
   active: boolean
-  caller?: Caller
-  actions: ExternalActionType[]
+  caller?: CallerType
+  subProcesses: SubProcessType[]
 }
 
-export type Caller = {
+export type CallerType = {
   id: string
   task: string
   subtask: string
   type: string
   version: string
-  subprocess: boolean
+  reply: boolean
 }
 
-export type ExternalActionType =
-  | {
-      type: 'processStart'
-      data: ProcessInput.AsObject
-    }
-  | {
-      type: 'processResponse'
-      data: ProcessExternalResponse.AsObject
-    }
+export type SubProcessType = {
+  id: string
+  status: ProcessStatusType | 'init'
+  input: string
+  type: string
+  version: string
+  reply: boolean
+}
 
 export type ProcessStatusType = 'running' | 'waiting' | 'error' | 'finished'
 
