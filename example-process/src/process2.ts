@@ -15,7 +15,57 @@ const [start, task] = b.connect(
   n.task({
     id: 'task',
     name: 'Simple task',
-    run: () => {},
+    run: ({ currentInput, currentSubtask, taskState }) => {
+      if (currentInput?.started) {
+        return new SubtaskResult({
+          taskState: {
+            _subProcesses: currentInput.started,
+          },
+          nextSubtask: currentSubtask,
+          pause: true,
+        })
+      } else if (currentInput?.finished) {
+        const subProcesses = taskState._subProcesses.map((sp) =>
+          sp.id === currentInput.finished.id ? currentInput.finished : sp,
+        )
+
+        if (subProcesses.every((sp) => sp.status === 'finished')) {
+          // finish
+          return null
+        } else {
+          return new SubtaskResult({
+            taskState: {
+              _subProcesses: subProcesses,
+            },
+            nextSubtask: currentSubtask,
+            pause: true,
+          })
+        }
+      } else {
+        return new SubtaskResult({
+          subProcesses: [
+            {
+              id: null,
+              status: 'init',
+              type: 'process1',
+              version: 'test',
+              input: null,
+              reply: true,
+            },
+            {
+              id: null,
+              status: 'init',
+              type: 'process1',
+              version: 'test',
+              input: null,
+              reply: true,
+            },
+          ],
+          nextSubtask: currentSubtask,
+          pause: true,
+        })
+      }
+    },
   }),
 )
 
@@ -24,20 +74,6 @@ task.connect(
   n.end({
     id: 'end',
     name: 'End',
-    finish: () => {
-      return new SubtaskResult({
-        subProcesses: [
-          {
-            id: null,
-            status: 'init',
-            type: 'process1',
-            version: 'test',
-            input: null,
-            reply: false,
-          },
-        ],
-      })
-    },
   }),
 )
 

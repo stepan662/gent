@@ -24,25 +24,72 @@ class BrokerController {
       result = await this.db.createProcess({ ...state, active: false })
     }
 
-    if (state.status === 'running') {
+    if (result.status === 'running') {
       this.queue.add({ id: result.id, time: result.nextDeployTime })
+    } else if (result.status === 'finished') {
+      await this.dealWithCaller(result)
     }
 
     return result
   }
 
-  private dealWithSubProcesses = async (state: ProcessStateType): Promise<ProcessStateType> => {
-    let subProcesses = state.subProcesses
-    let currentInput = null
+  private dealWithCaller = async (state: ProcessStateType) => {
+    if (state.caller && state.caller.reply && state.caller.id) {
+      const callerState = await this.db.getProcess(state.caller.id)
+      const subProcesses: SubProcessType[] = callerState.subProcesses?.map((sp) => {
+        if (sp.id === state.id) {
+          return {
+            ...sp,
+            status: state.status as any,
+          }
+        } else {
+          return sp
+        }
+      })
 
+      let newCallerState = {
+        ...callerState,
+        subProcesses,
+      }
+
+      const callerIsWaiting =
+        callerState.active === false &&
+        callerState.status === 'waiting' &&
+        callerState.nextTask === state.caller.task &&
+        callerState.nextSubtask === state.caller.subtask
+
+      if (callerIsWaiting) {
+        newCallerState = {
+          ...newCallerState,
+          status: 'running',
+          currentInput: {
+            finished: {
+              id: state.id,
+              status: state.status,
+              output: state.output,
+            },
+          },
+        }
+      }
+
+      const result = await this.db.updateProcess(newCallerState)
+
+      if (callerIsWaiting) {
+        this.queue.add({ id: result.id, time: result.nextDeployTime })
+      }
+    }
+  }
+
+  private dealWithSubProcesses = async (state: ProcessStateType): Promise<ProcessStateType> => {
     const newSubprocesses = state.subProcesses.filter((sp) => sp.status === 'init')
+    let newState = state
 
     if (newSubprocesses.length > 0) {
       const startedIds = await Promise.all(
         newSubprocesses.map((sp) => this.startProcess(sp, state)),
       )
       let index = 0
-      subProcesses = subProcesses.map((sp) => {
+      const subProcesses: SubProcessType[] = state.subProcesses.map((sp) => {
         if (sp.status === 'init') {
           const id = startedIds[index++]
           return {
@@ -55,18 +102,31 @@ class BrokerController {
           return sp
         }
       })
-      if (state.nextTask === state.currentTask && state.nextSubtask === state.currentSubtask) {
-        currentInput = {
-          started: startedIds,
+      newState = {
+        ...newState,
+        subProcesses,
+      }
+
+      if (
+        state.status === 'waiting' &&
+        state.nextTask === state.currentTask &&
+        state.nextSubtask === state.currentSubtask
+      ) {
+        newState = {
+          ...newState,
+          status: 'running',
+          currentInput: {
+            started: startedIds.map((id) => ({
+              id: id,
+              status: 'running',
+              output: null,
+            })),
+          },
         }
       }
     }
 
-    return {
-      ...state,
-      subProcesses,
-      currentInput,
-    }
+    return newState
   }
 
   public getProcess = async (processId: string) => {

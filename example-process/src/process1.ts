@@ -47,7 +47,7 @@ const waitTask = exclusive.connect(
     name: 'Wait 3s',
     run: () => {
       return new SubtaskResult({
-        delay: 3000,
+        delay: Math.floor(Math.random() * 3000),
       })
     },
   }),

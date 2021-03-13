@@ -53,7 +53,14 @@ class Automat {
       const rawResult = await task[state.currentSubtask]({ ...state })
       const result = this.getResult(task, rawResult)
 
-      const status = !result.nextSubtask && task.type === 'end' ? 'finished' : 'running'
+      let status: string
+      if (!result.nextSubtask && task.type === 'end') {
+        status = 'finished'
+      } else if (result.pause) {
+        status = 'waiting'
+      } else {
+        status = 'running'
+      }
 
       return {
         ...state,
@@ -63,6 +70,7 @@ class Automat {
         state: { ...state.state, ...result.state },
         taskState: result.isNewTask ? {} : { ...state.taskState, ...result.taskState },
         subProcesses: [...state.subProcesses, ...(result.subProcesses || [])],
+        currentInput: null,
         status,
       }
     } catch (e) {
