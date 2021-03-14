@@ -33,6 +33,10 @@ export class SubtaskResult<T = any> implements SubtaskResultType<T> {
   }
 }
 
-export type SubtaskType<T = any> = (
-  input?: ProcessStateType,
-) => Promise<SubtaskResult<T> | void | any> | SubtaskResult<T> | void | any
+export type SubtaskResultGeneric<T = any> =
+  | Promise<SubtaskResult<T> | void | any>
+  | SubtaskResult<T>
+  | void
+  | any
+
+export type SubtaskType<T = any> = (input?: ProcessStateType) => SubtaskResultGeneric<T>

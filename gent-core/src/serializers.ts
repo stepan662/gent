@@ -71,6 +71,7 @@ export function subProcessFromObject(i: SubProcessType): SubProcess {
   p.setInput(i.input)
   p.setType(i.type)
   p.setVersion(i.version)
+  p.setTask(i.task)
   p.setReply(i.reply)
   return p
 }
@@ -82,6 +83,7 @@ export function subProcessToObject(i: SubProcess): SubProcessType {
     input: i.getInput(),
     type: i.getType(),
     version: i.getVersion(),
+    task: i.getTask(),
     reply: i.getReply(),
   }
 }

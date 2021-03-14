@@ -689,7 +689,8 @@ proto.SubProcess.toObject = function(includeInstance, msg) {
     input: jspb.Message.getFieldWithDefault(msg, 3, ""),
     type: jspb.Message.getFieldWithDefault(msg, 4, ""),
     version: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    reply: jspb.Message.getBooleanFieldWithDefault(msg, 6, false)
+    task: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    reply: jspb.Message.getBooleanFieldWithDefault(msg, 7, false)
   };
 
   if (includeInstance) {
@@ -747,6 +748,10 @@ proto.SubProcess.deserializeBinaryFromReader = function(msg, reader) {
       msg.setVersion(value);
       break;
     case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTask(value);
+      break;
+    case 7:
       var value = /** @type {boolean} */ (reader.readBool());
       msg.setReply(value);
       break;
@@ -814,10 +819,17 @@ proto.SubProcess.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getTask();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
   f = message.getReply();
   if (f) {
     writer.writeBool(
-      6,
+      7,
       f
     );
   }
@@ -915,11 +927,29 @@ proto.SubProcess.prototype.setVersion = function(value) {
 
 
 /**
- * optional bool reply = 6;
+ * optional string task = 6;
+ * @return {string}
+ */
+proto.SubProcess.prototype.getTask = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.SubProcess} returns this
+ */
+proto.SubProcess.prototype.setTask = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional bool reply = 7;
  * @return {boolean}
  */
 proto.SubProcess.prototype.getReply = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 6, false));
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 7, false));
 };
 
 
@@ -928,7 +958,7 @@ proto.SubProcess.prototype.getReply = function() {
  * @return {!proto.SubProcess} returns this
  */
 proto.SubProcess.prototype.setReply = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 6, value);
+  return jspb.Message.setProto3BooleanField(this, 7, value);
 };
 
 

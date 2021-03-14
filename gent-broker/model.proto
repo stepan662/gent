@@ -20,7 +20,8 @@ message SubProcess {
   string input = 3;
   string type = 4;
   string version = 5;
-  bool reply = 6;
+  string task = 6;
+  bool reply = 7;
 }
 
 message ProcessExternalResponse {

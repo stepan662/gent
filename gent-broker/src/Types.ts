@@ -39,6 +39,7 @@ export type SubProcessType = {
   input: string
   type: string
   version: string
+  task: string
   reply: boolean
 }
 

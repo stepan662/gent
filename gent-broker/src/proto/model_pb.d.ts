@@ -83,6 +83,9 @@ export class SubProcess extends jspb.Message {
   getVersion(): string;
   setVersion(value: string): void;
 
+  getTask(): string;
+  setTask(value: string): void;
+
   getReply(): boolean;
   setReply(value: boolean): void;
 
@@ -103,6 +106,7 @@ export namespace SubProcess {
     input: string,
     type: string,
     version: string,
+    task: string,
     reply: boolean,
   }
 }

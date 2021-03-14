@@ -122,9 +122,10 @@ const VisualProcess = ({
     })
 
     nodes.forEach((node) => {
+      const element = defaultElements[node.type] || defaultElements['task']
       graph.setNode(node.id, {
         label: node.name || node.id,
-        ...defaultElements[node.type].getSize(node, theme),
+        ...element.getSize(node, theme),
       })
     })
 
@@ -166,7 +167,7 @@ const VisualProcess = ({
         <g>
           {nodes.map((node) => {
             const graphNode = graph.node(node.id)
-            const Element = defaultElements[node.type]
+            const Element = defaultElements[node.type] || defaultElements['task']
             return (
               <Element
                 key={node.id}

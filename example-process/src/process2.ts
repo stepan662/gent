@@ -1,7 +1,6 @@
 import b from 'gent-core/lib/NodeBuilder'
 import * as n from 'gent-core/lib/Node'
 import Process from 'gent-core/lib/Process'
-import { SubtaskResult } from 'gent-core/lib/Subtask'
 
 const [start, task] = b.connect(
   // start event
@@ -12,59 +11,26 @@ const [start, task] = b.connect(
   }),
 
   // task
-  n.task({
-    id: 'task',
-    name: 'Simple task',
-    run: ({ currentInput, currentSubtask, taskState }) => {
-      if (currentInput?.started) {
-        return new SubtaskResult({
-          taskState: {
-            _subProcesses: currentInput.started,
-          },
-          nextSubtask: currentSubtask,
-          pause: true,
-        })
-      } else if (currentInput?.finished) {
-        const subProcesses = taskState._subProcesses.map((sp) =>
-          sp.id === currentInput.finished.id ? currentInput.finished : sp,
-        )
-
-        if (subProcesses.every((sp) => sp.status === 'finished')) {
-          // finish
-          return null
-        } else {
-          return new SubtaskResult({
-            taskState: {
-              _subProcesses: subProcesses,
-            },
-            nextSubtask: currentSubtask,
-            pause: true,
-          })
-        }
-      } else {
-        return new SubtaskResult({
-          subProcesses: [
-            {
-              id: null,
-              status: 'init',
-              type: 'process1',
-              version: 'test',
-              input: null,
-              reply: true,
-            },
-            {
-              id: null,
-              status: 'init',
-              type: 'process1',
-              version: 'test',
-              input: null,
-              reply: true,
-            },
-          ],
-          nextSubtask: currentSubtask,
-          pause: true,
-        })
-      }
+  n.subProcess({
+    id: 'subprocess',
+    name: 'Subprocess',
+    subprocesses: [
+      {
+        type: 'process1',
+        version: 'test',
+        input: null,
+      },
+      {
+        type: 'process1',
+        version: 'test',
+        input: null,
+      },
+    ],
+    onStart: (tasks) => {
+      console.log('onStart', tasks)
+    },
+    onFinish: (task) => {
+      console.log('onFinish', task)
     },
   }),
 )

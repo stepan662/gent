@@ -2,6 +2,7 @@ import { ProcessStateType, StartType, NodeType } from './Types'
 
 import Process from './Process'
 import { SubtaskResult } from './Subtask'
+import { wrapResult } from './wrapResult'
 
 class Automat {
   process: Process
@@ -86,8 +87,7 @@ class Automat {
     node: NodeType,
     rawResult: any,
   ): SubtaskResult & { isNewTask: boolean; deployTime: number } {
-    const result =
-      rawResult instanceof SubtaskResult ? rawResult : new SubtaskResult({ state: rawResult })
+    const result = wrapResult(rawResult)
 
     let nextTask: string
     let nextSubtask: string

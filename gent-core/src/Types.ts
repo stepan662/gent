@@ -2,7 +2,7 @@ import { SubtaskType } from './Subtask'
 /*
  *  Process state
  */
-export type ProcessStateType = {
+export type ProcessStateType<TInput = any> = {
   id: string
   created: number
   type: string
@@ -16,7 +16,7 @@ export type ProcessStateType = {
   nextSubtask: string
   taskState: any
   state: any
-  input: any
+  input: TInput
   output: any
   error?: ProcessErrorType
   tags: string[]
@@ -40,6 +40,7 @@ export type SubProcessType = {
   input: string
   type: string
   version: string
+  task: string
   reply: boolean
 }
 
@@ -64,7 +65,7 @@ export type ElementType = {
   id?: string
   name?: string
   description?: string
-  type: 'link' | 'start' | 'end' | 'exclusive' | 'task'
+  type: 'link' | 'start' | 'end' | 'exclusive' | 'task' | 'subprocess'
 }
 
 export type LinkTypeType = 'error' | 'timeout' | undefined
@@ -111,7 +112,13 @@ export type TaskType = ElementType & {
   run: SubtaskType
 }
 
-export type NodeType = StartType | EndType | ExclusiveType | TaskType
+export type SubprocessType = ElementType & {
+  _first: string
+  type: 'subprocess'
+  run: SubtaskType
+}
+
+export type NodeType = StartType | EndType | ExclusiveType | TaskType | SubprocessType
 
 /*
  * Executable process structure

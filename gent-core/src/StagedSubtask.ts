@@ -1,5 +1,6 @@
 import { ProcessStateType } from './Types'
-import { SubtaskResult, SubtaskType } from './Subtask'
+import { SubtaskResult } from './Subtask'
+import { wrapResult } from './wrapResult'
 
 type StageFunc = <T>(func: () => Promise<SubtaskResult<T> | T> | SubtaskResult<T> | T) => Promise<T>
 type LoopFunc = <T>(
@@ -14,14 +15,6 @@ type StagedOperations = {
 export class StageInterruption {
   constructor(public result: SubtaskResult) {
     this.result = result
-  }
-}
-
-const wrapResult = (rawResult: SubtaskResult | any): SubtaskResult => {
-  if (rawResult instanceof SubtaskResult) {
-    return rawResult
-  } else {
-    return new SubtaskResult({ returnData: rawResult })
   }
 }
 
