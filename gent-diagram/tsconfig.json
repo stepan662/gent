@@ -1,5 +1,5 @@
 {
-  "include": ["src/index.tsx"],
+  "include": ["src/index.ts"],
   "exclude": ["./node_modules/", "**/__tests__/*"],
   "sourceMap": true,
   "target": "es6",

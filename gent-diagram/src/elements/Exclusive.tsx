@@ -1,11 +1,15 @@
-import React, { useContext } from 'react'
-import Context from './Context'
+import React from 'react'
+import ElementInterface from './ElementInterface'
 
 import { calculateRectForText } from './tools'
 
-const Exclusive = ({ data, place: { x, y, width, height, ...rest }, clickable, background }) => {
-  const { theme } = useContext(Context)
-
+export const Exclusive: ElementInterface = ({
+  node,
+  place: { x, y, width, height, ...rest },
+  clickable,
+  background,
+  theme,
+}) => {
   const circledWidth = Math.sqrt((width * width) / 2)
   const center = {
     x: x + width / 2,
@@ -13,7 +17,7 @@ const Exclusive = ({ data, place: { x, y, width, height, ...rest }, clickable, b
   }
 
   const lPadding = 3
-  const { width: lWidth, height: lHeight } = calculateRectForText(data.name || '', 12, theme.font, [
+  const { width: lWidth, height: lHeight } = calculateRectForText(node.name || '', 12, theme.font, [
     lPadding,
   ])
 
@@ -50,7 +54,7 @@ const Exclusive = ({ data, place: { x, y, width, height, ...rest }, clickable, b
         alignmentBaseline="central"
         fontSize={theme.taskOuterFontSize}
       >
-        {data.name}
+        {node.name}
       </text>
       <path
         d={`M ${center.x - width / 8} ${center.y - width / 8} L ${center.x + width / 8} ${
@@ -70,11 +74,9 @@ const Exclusive = ({ data, place: { x, y, width, height, ...rest }, clickable, b
   )
 }
 
-Exclusive.getSize = (data, state) => {
+Exclusive.getSize = () => {
   return {
     height: 40,
     width: 40,
   }
 }
-
-export default Exclusive

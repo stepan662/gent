@@ -7,8 +7,12 @@ import { getTokens } from '@kiwicom/orbit-design-tokens'
 import client from '../src/client'
 
 const swrConfig: ConfigInterface = {
-  fetcher: async (url, ...args) => {
-    return await client(url, ...args)
+  fetcher: async (...urls) => {
+    if (urls.length > 1) {
+      return await Promise.all(urls.map((url) => client(url)))
+    } else {
+      return await client(urls[0])
+    }
   },
   refreshInterval: 0,
   revalidateOnFocus: true,

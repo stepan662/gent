@@ -1,11 +1,8 @@
-import React, { useContext } from 'react'
-import Context from './Context'
+import React from 'react'
 import drawCurve from './curvePath'
 import { calculateRectForText } from './tools'
 
-const Link = ({ position, properties }) => {
-  const { theme } = useContext(Context)
-
+export const Link = ({ position, properties, theme }) => {
   const points = position.points
 
   let path = drawCurve(points)
@@ -22,8 +19,9 @@ const Link = ({ position, properties }) => {
     <React.Fragment>
       <path d={path} fill="transparent" stroke={theme.connectionLine} />
       <path
-        d={`M ${last.x + 1} ${last.y} L ${last.x - 10} ${last.y - 4} L ${last.x - 10} ${last.y +
-          4}`}
+        d={`M ${last.x + 1} ${last.y} L ${last.x - 10} ${last.y - 4} L ${last.x - 10} ${
+          last.y + 4
+        }`}
         fill={theme.connectionLine}
         transform={`rotate(${Math.round(angle)}, ${last.x}, ${last.y})`}
       />
@@ -56,5 +54,3 @@ const Link = ({ position, properties }) => {
 Link.getSize = (connection, theme) => {
   return calculateRectForText(connection.name || '', theme.connectionLabelFontSize, theme.font)
 }
-
-export default Link
