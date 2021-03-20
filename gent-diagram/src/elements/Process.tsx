@@ -1,6 +1,5 @@
 import React from 'react'
 import { ProcessStateType } from '../types/ProcessState'
-import { Schema } from '../types/ProcessSchema'
 import theme from '../Theme'
 import { getGraph } from '../dagre'
 import { Task, End, Start, Exclusive, Link, Subprocess } from '.'
@@ -31,7 +30,10 @@ const getFillColor = (state: ProcessStateType, taskId: string, th: typeof theme)
   return th.taskBackground
 }
 
-const sizeMapper = ({ schema, state, subs, level }) => (taskType: string, taskId: string) => {
+const sizeMapper = ({ schema, state, subs, level, getProcessSize, options }) => (
+  taskType: string,
+  taskId: string,
+) => {
   if (taskType === 'link') {
     return Link.getSize(
       schema.connections.find((c) => c.id === taskId),
@@ -46,6 +48,8 @@ const sizeMapper = ({ schema, state, subs, level }) => (taskType: string, taskId
       state,
       schema,
       level,
+      getProcessSize,
+      options,
     })
   }
 }
@@ -55,11 +59,19 @@ const scale = (level: number) => {
   return 1 / (level * scaleSpeed + 1)
 }
 
-const Process: ElementInterface = ({ schema, state, subs, place: { x, y }, level }) => {
+const Process: ElementInterface = ({
+  schema,
+  state,
+  subs,
+  place: { x, y },
+  level,
+  getProcessSize,
+  options,
+}) => {
   const { connections, nodes } = getGraph({
     schema,
     theme,
-    sizeMapper: sizeMapper({ schema, state, subs, level }),
+    sizeMapper: sizeMapper({ schema, state, subs, level, getProcessSize, options }),
   })
 
   return (
@@ -78,6 +90,7 @@ const Process: ElementInterface = ({ schema, state, subs, place: { x, y }, level
             schema={schema}
             state={state}
             subs={subs}
+            options={options}
             place={{
               y: node.dimensions.y - node.dimensions.height / 2,
               x: node.dimensions.x - node.dimensions.width / 2,
@@ -86,6 +99,7 @@ const Process: ElementInterface = ({ schema, state, subs, place: { x, y }, level
             }}
             background={getFillColor(state, node.id, theme)}
             level={level}
+            getProcessSize={getProcessSize}
           />
         )
       })}
@@ -93,13 +107,12 @@ const Process: ElementInterface = ({ schema, state, subs, place: { x, y }, level
   )
 }
 
-Process.getSize = ({ schema, state, subs, level }) => {
+Process.getSize = ({ schema, state, subs, level, getProcessSize, options }) => {
   const { dimensions } = getGraph({
     schema,
     theme,
-    sizeMapper: sizeMapper({ schema, state, subs, level }),
+    sizeMapper: sizeMapper({ schema, state, subs, level, getProcessSize, options }),
   })
-  console.log(level)
   return {
     height: dimensions.height * scale(level),
     width: dimensions.width * scale(level),

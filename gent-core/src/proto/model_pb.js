@@ -15,11 +15,11 @@ var goog = jspb;
 var global = Function('return this')();
 
 goog.exportSymbol('proto.Caller', null, global);
-goog.exportSymbol('proto.Empty', null, global);
 goog.exportSymbol('proto.Process', null, global);
 goog.exportSymbol('proto.ProcessError', null, global);
 goog.exportSymbol('proto.ProcessExternalResponse', null, global);
 goog.exportSymbol('proto.ProcessId', null, global);
+goog.exportSymbol('proto.ProcessIds', null, global);
 goog.exportSymbol('proto.Processes', null, global);
 goog.exportSymbol('proto.SubProcess', null, global);
 goog.exportSymbol('proto.Worker', null, global);
@@ -201,16 +201,16 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.Empty = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+proto.ProcessIds = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.ProcessIds.repeatedFields_, null);
 };
-goog.inherits(proto.Empty, jspb.Message);
+goog.inherits(proto.ProcessIds, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
   /**
    * @public
    * @override
    */
-  proto.Empty.displayName = 'proto.Empty';
+  proto.ProcessIds.displayName = 'proto.ProcessIds';
 }
 
 
@@ -2445,6 +2445,13 @@ proto.ProcessId.prototype.setProcessid = function(value) {
 
 
 
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.ProcessIds.repeatedFields_ = [1];
+
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -2460,8 +2467,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.Empty.prototype.toObject = function(opt_includeInstance) {
-  return proto.Empty.toObject(opt_includeInstance, this);
+proto.ProcessIds.prototype.toObject = function(opt_includeInstance) {
+  return proto.ProcessIds.toObject(opt_includeInstance, this);
 };
 
 
@@ -2470,13 +2477,13 @@ proto.Empty.prototype.toObject = function(opt_includeInstance) {
  * @param {boolean|undefined} includeInstance Deprecated. Whether to include
  *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.Empty} msg The msg instance to transform.
+ * @param {!proto.ProcessIds} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.Empty.toObject = function(includeInstance, msg) {
+proto.ProcessIds.toObject = function(includeInstance, msg) {
   var f, obj = {
-
+    processidList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -2490,29 +2497,33 @@ proto.Empty.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.Empty}
+ * @return {!proto.ProcessIds}
  */
-proto.Empty.deserializeBinary = function(bytes) {
+proto.ProcessIds.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.Empty;
-  return proto.Empty.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.ProcessIds;
+  return proto.ProcessIds.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.Empty} msg The message object to deserialize into.
+ * @param {!proto.ProcessIds} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.Empty}
+ * @return {!proto.ProcessIds}
  */
-proto.Empty.deserializeBinaryFromReader = function(msg, reader) {
+proto.ProcessIds.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.addProcessid(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -2526,9 +2537,9 @@ proto.Empty.deserializeBinaryFromReader = function(msg, reader) {
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.Empty.prototype.serializeBinary = function() {
+proto.ProcessIds.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.Empty.serializeBinaryToWriter(this, writer);
+  proto.ProcessIds.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -2536,12 +2547,56 @@ proto.Empty.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.Empty} message
+ * @param {!proto.ProcessIds} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.Empty.serializeBinaryToWriter = function(message, writer) {
+proto.ProcessIds.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getProcessidList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * repeated string processId = 1;
+ * @return {!Array<string>}
+ */
+proto.ProcessIds.prototype.getProcessidList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 1));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.ProcessIds} returns this
+ */
+proto.ProcessIds.prototype.setProcessidList = function(value) {
+  return jspb.Message.setField(this, 1, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.ProcessIds} returns this
+ */
+proto.ProcessIds.prototype.addProcessid = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 1, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.ProcessIds} returns this
+ */
+proto.ProcessIds.prototype.clearProcessidList = function() {
+  return this.setProcessidList([]);
 };
 
 

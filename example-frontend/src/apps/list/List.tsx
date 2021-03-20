@@ -25,6 +25,8 @@ const List = () => {
         <Stack direction="row">
           <NewProcessButton type="process1" label="Process 1" />
           <NewProcessButton type="process2" label="Process 2" />
+          <NewProcessButton type="process3" label="Process 3" />
+          <NewProcessButton type="process4" label="Process 4" />
         </Stack>
 
         <h2>Processes: </h2>

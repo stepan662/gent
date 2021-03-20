@@ -1,10 +1,16 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { ProcessStateType } from './types/ProcessState'
 import { Schema } from './types/ProcessSchema'
 import theme from './Theme'
 import Process from './elements/Process'
+import { Dimensions, SizeFunc, SizeProps } from './elements/ElementInterface'
 
-type Props = {
+export type DiagramOptions = {
+  onRequestSubprocess?: (ids: string[]) => void
+  allowedLevel?: number
+}
+
+type Props = DiagramOptions & {
   schema: Schema
   state?: ProcessStateType
   subs: SubProcess[]
@@ -15,8 +21,32 @@ type SubProcess = {
   schema: Schema
 }
 
-const Diagram = (props: Props) => {
-  const dimensions = Process.getSize({ ...props, theme, node: null, level: 0 })
+const processSizeCacher = (): SizeFunc => {
+  const cache: Map<string, Dimensions> = new Map()
+  return (props) => {
+    const key = props.state.id
+    if (!cache[key]) {
+      cache[key] = Process.getSize(props)
+    }
+    return cache[key]
+  }
+}
+
+const Diagram = ({ allowedLevel = 0, onRequestSubprocess, ...props }: Props) => {
+  // cache process layout, so we don't recalculate unnecessarly wich dagre
+  const getProcessSize = useMemo(() => processSizeCacher(), [props?.state?.id, props.subs?.length])
+  const options = {
+    allowedLevel,
+    onRequestSubprocess,
+  }
+  const dimensions = getProcessSize({
+    ...props,
+    theme,
+    node: null,
+    level: 0,
+    options,
+    getProcessSize,
+  })
 
   return (
     <svg
@@ -35,10 +65,12 @@ const Diagram = (props: Props) => {
     >
       <Process
         {...props}
+        getProcessSize={getProcessSize}
         theme={theme}
         node={null}
         place={{ x: 0, y: 0, ...dimensions }}
         level={0}
+        options={options}
       />
     </svg>
   )

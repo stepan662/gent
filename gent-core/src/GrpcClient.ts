@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js'
 import { BrokerClient } from './proto/model_grpc_pb'
-import { Worker, Process, ProcessId, Empty } from './proto/model_pb'
+import { Worker, Process, ProcessId, ProcessIds } from './proto/model_pb'
 import { ProcessStateType } from './Types'
 import { processFromObject, processToObject, workerFromObject } from './serializers'
 
@@ -94,9 +94,10 @@ class GrpcClient {
     })
   }
 
-  public getProcesses = async (): Promise<ProcessStateType[]> => {
+  public getProcesses = async (processIds?: string[]): Promise<ProcessStateType[]> => {
     return new Promise((resolve, reject) => {
-      const input = new Empty()
+      const input = new ProcessIds()
+      input.setProcessidList(processIds || [])
       this.client.get_processes(input, (err, data) => {
         if (err) {
           reject(err)

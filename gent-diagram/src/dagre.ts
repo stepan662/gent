@@ -1,7 +1,6 @@
-import dagre, { graphlib } from 'dagre'
+import dagre from 'dagre'
 import { Schema, SchemaConnection, SchemaNode } from './types/ProcessSchema'
 import theme from './Theme'
-import { ProcessStateType } from './types/ProcessState'
 
 const getNext = (schema: Schema, element) => {
   const connections = schema.connections.filter((c) => c.from === element.id)
@@ -25,11 +24,7 @@ export type ComputedGraphResult = {
   dimensions: dagre.GraphLabel
 }
 
-export const getGraph = ({
-  schema,
-  theme,
-  sizeMapper,
-}: ComputedGraphProps): ComputedGraphResult => {
+export const getGraph = ({ schema, sizeMapper }: ComputedGraphProps): ComputedGraphResult => {
   let start = schema.nodes[0]
   const nodes = [start]
   const graph = new dagre.graphlib.Graph({ multigraph: true })

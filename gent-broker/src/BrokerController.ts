@@ -133,8 +133,8 @@ class BrokerController {
     return this.db.getProcess(processId)
   }
 
-  public getProcesses = async () => {
-    return this.db.getAllProcesses()
+  public getProcesses = async (ids: string[]) => {
+    return this.db.getProcesses(ids)
   }
 
   private processWork = async (processId: string) => {

@@ -2,15 +2,20 @@ import React from 'react'
 import { ProcessStateType } from '../types/ProcessState'
 import { Schema, SchemaNode } from '../types/ProcessSchema'
 import theme from '../Theme'
+import { DiagramOptions } from '../Diagram'
 
 export type SizeProps = {
-  node: SchemaNode
+  node?: SchemaNode
   schema: Schema
   state?: ProcessStateType
   subs: SubProcess[]
   theme: typeof theme
   level: number
+  options: DiagramOptions
+  getProcessSize: SizeFunc
 }
+
+export type SizeFunc = (props: SizeProps) => Dimensions
 
 export type SubProcess = {
   state: ProcessStateType
@@ -34,7 +39,7 @@ type ElementProps = SizeProps & {
 }
 
 type ElementInterface = {
-  getSize?: (props: SizeProps) => Dimensions
+  getSize?: SizeFunc
 } & React.FC<ElementProps>
 
 export default ElementInterface

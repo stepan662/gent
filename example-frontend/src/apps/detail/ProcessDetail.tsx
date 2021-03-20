@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import useSWR from 'swr'
 import GentDiagram from 'gent-diagram'
@@ -26,29 +26,57 @@ const Header = styled.div`
 const Process = () => {
   const router = useRouter()
 
-  const { processId } = router.query
+  const processId = router.query.processId as string
 
-  const { data: state } = useSWR<ProcessStateType>(processId && `/state?id=${processId}`, {
-    refreshInterval: 1000,
-  })
-  const { data: schema, revalidate: schemaRevalidate } = useSWR<Schema>(
-    state && `/schema?type=${state.type}`,
+  const [observedIds, setObservedIds] = useState<string[]>()
+
+  const addObservedIds = (ids: string[]) => {
+    setObservedIds([...observedIds, ...ids])
+  }
+
+  useEffect(() => {
+    if (processId) {
+      setObservedIds([processId])
+    }
+  }, [processId])
+
+  const { data: processStates } = useSWR<{ payload: ProcessStateType[] }>(
+    observedIds && `/processes?ids=${observedIds.join(',')}`,
+    {
+      refreshInterval: 1000,
+    },
+  )
+
+  const observedTypes = processStates?.payload.map((s) => s.type)
+
+  const { data: processSchemas, revalidate: schemaRevalidate } = useSWR<{ payload: Schema[] }>(
+    observedTypes && `/schemas?types=${observedTypes.join(',')}`,
     {
       refreshInterval: 10000,
     },
   )
 
-  const { data: subSchemas } = useSWR<Schema[]>(
-    state?.subProcesses?.map((sub) => `/schema?type=${sub.type}`),
-  )
-  const { data: subStates } = useSWR<ProcessStateType[]>(
-    state?.subProcesses?.map((sub) => `/state?id=${sub.id}`),
-    { refreshInterval: 1000 },
-  )
+  const cachedState = useMemo(() => {
+    let states: typeof processStates = null
+    let schemas: typeof processSchemas = null
+    return (processStates, processSchemas) => {
+      states = processStates || states
+      schemas = processSchemas || schemas
+      return {
+        states,
+        schemas,
+      }
+    }
+  }, [processId])
 
-  const subs = subStates
-    ?.map((state) => {
-      const schema = subSchemas?.find((s) => s.attributes.type === state.type)
+  const { states, schemas } = cachedState(processStates, processSchemas)
+
+  const state = states?.payload.find((s) => s.id === processId)
+  const schema = schemas?.payload.find((s) => s.attributes.type === state?.type)
+
+  const subs = states?.payload
+    .map((state) => {
+      const schema = schemas?.payload.find((s) => s.attributes.type === state.type)
       if (schema) {
         return { state, schema }
       }
@@ -60,7 +88,13 @@ const Process = () => {
       {schema && (
         <Stack>
           <Heading>{schema.attributes.name}</Heading>
-          <GentDiagram schema={schema} state={state} subs={subs} />
+          <GentDiagram
+            schema={schema}
+            state={state}
+            subs={subs}
+            onRequestSubprocess={addObservedIds}
+            allowedLevel={3}
+          />
         </Stack>
       )}
 

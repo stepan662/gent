@@ -6,19 +6,54 @@ import ElementInterface from './ElementInterface'
 import Process from './Process'
 import { Task } from './Task'
 
-const getRelevantSubprocesses = (state: ProcessStateType, node: SchemaNode, subs: SubProcess[]) => {
-  const subIds = state.subProcesses.filter((v) => v.task === node.id).map((v) => v.id)
+const getRelevantSubs = (state: ProcessStateType, node: SchemaNode) => {
+  return state.subProcesses.filter((v) => v.task === node.id)
+}
+
+const getRelevantSubsFullState = (
+  state: ProcessStateType,
+  node: SchemaNode,
+  subs: SubProcess[],
+) => {
+  const subIds = getRelevantSubs(state, node).map((s) => s.id)
   return subs?.filter(({ state }) => subIds.includes(state.id)) || []
 }
 
 export const Subprocess: ElementInterface = (props) => {
-  const { node, place, state, theme, subs, level } = props
-  const relevantSubs = getRelevantSubprocesses(state, node, subs)
+  const { node, place, state, theme, subs, level, getProcessSize, options, background } = props
+  const relevantSubs = getRelevantSubs(state, node)
+  const relevantSubsStates = getRelevantSubsFullState(state, node, subs)
 
-  const { x, y } = place
+  const { x, y, width, height } = place
 
-  if (relevantSubs.length === 0) {
-    return <Task {...props} />
+  const onClickHandler = () => {
+    if (options.onRequestSubprocess && level < options.allowedLevel) {
+      options.onRequestSubprocess(relevantSubs.map((s) => s.id))
+    }
+  }
+
+  if (relevantSubsStates.length === 0) {
+    return (
+      <React.Fragment>
+        <rect
+          {...place}
+          stroke={theme.taskBorder}
+          fill={background}
+          onClick={onClickHandler}
+        ></rect>
+        <text
+          x={x + width / 2}
+          y={y + height / 2}
+          textAnchor="middle"
+          alignmentBaseline="central"
+          fill={theme.taskInnerTextColor}
+          fontFamily={`${theme.taskInnerFontSize}px`}
+          onClick={onClickHandler}
+        >
+          {node.name}
+        </text>
+      </React.Fragment>
+    )
   }
 
   let yShift = 0
@@ -26,30 +61,34 @@ export const Subprocess: ElementInterface = (props) => {
   return (
     <React.Fragment>
       <rect {...place} stroke={theme.taskBorder} fill={theme.subtaskBackground}></rect>
-      {relevantSubs.map((sub) => {
+      {relevantSubsStates.map((sub) => {
         const { schema, state } = sub
-        const dimensions = Process.getSize({
+        const dimensions = getProcessSize({
           schema,
           state,
           subs,
           theme,
           node: null,
           level: level + 1,
+          getProcessSize,
+          options,
         })
         const yCor = y + yShift
         yShift += dimensions.height
         return (
           <Process
-            schema={sub.schema}
-            state={sub.state}
+            key={state.id}
+            schema={schema}
+            state={state}
             subs={subs}
             theme={theme}
-            node={null}
+            getProcessSize={getProcessSize}
             place={{
               x,
               y: yCor,
             }}
             level={level + 1}
+            options={options}
           />
         )
       })}
@@ -59,9 +98,9 @@ export const Subprocess: ElementInterface = (props) => {
 
 Subprocess.getSize = (props) => {
   const { state, node, subs, level } = props
-  const relevantSubs = getRelevantSubprocesses(state, node, subs)
+  const relevantSubs = getRelevantSubsFullState(state, node, subs)
   const relevantSubDimensions = relevantSubs.map(({ schema, state }) =>
-    Process.getSize({ schema, state, subs, theme: props.theme, node: null, level: level + 1 }),
+    props.getProcessSize({ ...props, schema, state, level: level + 1 }),
   )
   if (relevantSubDimensions.length === 0) {
     return Task.getSize(props)

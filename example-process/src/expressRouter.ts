@@ -36,7 +36,7 @@ export const createRouter = (automats: Automat[], client: GrpcClient) => {
   )
 
   router.get(
-    '/state',
+    '/process',
     asyncHandler(async (req, res) => {
       const id = req.query.id as string
       const state = await client.getProcess(id)
@@ -47,9 +47,20 @@ export const createRouter = (automats: Automat[], client: GrpcClient) => {
   router.get(
     '/processes',
     asyncHandler(async (req, res) => {
-      const processes = await client.getProcesses()
+      const ids = (req.query.ids as String)?.split(',')
+      const processes = await client.getProcesses(ids)
       res.send({
         payload: processes,
+      })
+    }),
+  )
+
+  router.get(
+    '/schemas',
+    asyncHandler(async (req, res) => {
+      const types = (req.query.types as String)?.split(',')
+      res.send({
+        payload: types.map((type) => getAutomat(type).process.getSchema()),
       })
     }),
   )

@@ -315,19 +315,25 @@ export namespace ProcessId {
   }
 }
 
-export class Empty extends jspb.Message {
+export class ProcessIds extends jspb.Message {
+  clearProcessidList(): void;
+  getProcessidList(): Array<string>;
+  setProcessidList(value: Array<string>): void;
+  addProcessid(value: string, index?: number): string;
+
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Empty.AsObject;
-  static toObject(includeInstance: boolean, msg: Empty): Empty.AsObject;
+  toObject(includeInstance?: boolean): ProcessIds.AsObject;
+  static toObject(includeInstance: boolean, msg: ProcessIds): ProcessIds.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: Empty, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Empty;
-  static deserializeBinaryFromReader(message: Empty, reader: jspb.BinaryReader): Empty;
+  static serializeBinaryToWriter(message: ProcessIds, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ProcessIds;
+  static deserializeBinaryFromReader(message: ProcessIds, reader: jspb.BinaryReader): ProcessIds;
 }
 
-export namespace Empty {
+export namespace ProcessIds {
   export type AsObject = {
+    processidList: Array<string>,
   }
 }
 

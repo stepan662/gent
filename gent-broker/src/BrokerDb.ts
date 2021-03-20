@@ -60,8 +60,12 @@ class BrokerDb {
     return deserializeProcess(result)
   }
 
-  getAllProcesses = async () => {
-    const result = await Process.findAll({ order: [['id', 'DESC']], limit: 20 })
+  getProcesses = async (processIds?: string[]) => {
+    const result = await Process.findAll({
+      where: processIds?.length ? { id: processIds } : undefined,
+      order: [['id', 'DESC']],
+      limit: processIds?.length || 20,
+    })
     return result.map(deserializeProcess)
   }
 }

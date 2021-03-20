@@ -67,12 +67,14 @@ message ProcessId {
   string processId = 1;
 }
 
-message Empty {}
+message ProcessIds {
+  repeated string processId = 1;
+}
 
 service Broker {
   rpc worker(stream Worker) returns (stream Process);
   rpc create_process(Process) returns (Process);
   rpc step_result(Process) returns (Process);
   rpc get_process(ProcessId) returns (Process);
-  rpc get_processes(Empty) returns (Processes);
+  rpc get_processes(ProcessIds) returns (Processes);
 }

@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js'
-import { Process, ProcessId, Processes, Empty, Worker } from './proto/model_pb'
+import { Process, ProcessId, Processes, ProcessIds, Worker } from './proto/model_pb'
 import { IBrokerServer } from './proto/model_grpc_pb'
 import WorkersManager from './WorkersManager'
 import { processFromObject, processToObject } from './serializers'
@@ -51,8 +51,9 @@ export function getBrokerServer(manager: WorkersManager, controller: BrokerContr
       }
     }
 
-    get_processes: grpc.handleUnaryCall<Empty, Processes> = async (_call, callback) => {
-      const processes = await controller.getProcesses()
+    get_processes: grpc.handleUnaryCall<ProcessIds, Processes> = async (call, callback) => {
+      const ids = call.request.getProcessidList()
+      const processes = await controller.getProcesses(ids)
       const mappedProcesses = processes.map(processFromObject)
       const result = new Processes()
       result.setProcessesList(mappedProcesses)
