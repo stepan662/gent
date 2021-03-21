@@ -134,7 +134,7 @@ export const subProcess = (props?: SubProcessInput): SubprocessType => {
             },
           })
         }
-      } else {
+      } else if (!taskState?._subProcesses) {
         return new SubtaskResult({
           subProcesses: subprocesses.map((s) => ({
             id: null,

@@ -1,6 +1,6 @@
 import BrokerDb from './BrokerDb'
-import TasksQueue from './TasksQueue'
-import { ProcessStateType, SubProcessType } from './Types'
+import TasksQueue, { PendingMessage } from './TasksQueue'
+import { ProcessStateType, ProcessStatusType, SubProcessType } from './Types'
 import WorkersManager from './WorkersManager'
 
 class BrokerController {
@@ -13,74 +13,88 @@ class BrokerController {
     this.db = new BrokerDb()
   }
 
-  public processResult = async (state: ProcessStateType) => {
+  public processResult = async (inState: ProcessStateType) => {
+    let state = { ...inState }
     const isExisting = Boolean(state.id)
 
-    let result: ProcessStateType
     if (isExisting) {
-      const updatedState = await this.dealWithSubProcesses(state)
-      result = await this.db.updateProcess({ ...updatedState, active: false })
+      state = await this.startSubprocessesIfNew(state)
+      state = await this.db.updateProcess(state)
     } else {
-      result = await this.db.createProcess({ ...state, active: false })
+      state = await this.db.createProcess(state)
     }
 
-    if (result.status === 'running') {
-      this.queue.add({ id: result.id, time: result.nextDeployTime })
-    } else if (result.status === 'finished') {
-      await this.dealWithCaller(result)
+    if (state.status === 'running' || this.queue.havePendingMessages(state.id)) {
+      this.queue.add({ id: state.id, time: state.nextDeployTime })
+    } else {
+      // not active, not in queue
+      this.queue.setActivity(state.id, false)
+      if (state.status === 'finished') {
+        this.updateCaller(state)
+      }
     }
 
-    return result
+    return state
   }
 
-  private dealWithCaller = async (state: ProcessStateType) => {
-    if (state.caller && state.caller.reply && state.caller.id) {
-      const callerState = await this.db.getProcess(state.caller.id)
-      const subProcesses: SubProcessType[] = callerState.subProcesses?.map((sp) => {
-        if (sp.id === state.id) {
+  private dealWithPendingMessages = (state: ProcessStateType): ProcessStateType => {
+    let subProcesses = state.subProcesses
+    while (this.queue.havePendingMessages(state.id)) {
+      const pendingMessage = this.queue.popPendingMessage(state.id)
+      // update global subprocesses
+      subProcesses = subProcesses.map((sp) => {
+        if (sp.id === pendingMessage.source) {
           return {
             ...sp,
-            status: state.status as any,
+            status: pendingMessage.status,
           }
-        } else {
-          return sp
         }
+        return sp
       })
 
-      let newCallerState = {
-        ...callerState,
-        subProcesses,
-      }
+      const callerInCorrectState =
+        state.nextTask === pendingMessage.task &&
+        state.nextSubtask === pendingMessage.subtask &&
+        state.status === 'waiting'
 
-      const callerIsWaiting =
-        callerState.active === false &&
-        callerState.status === 'waiting' &&
-        callerState.nextTask === state.caller.task &&
-        callerState.nextSubtask === state.caller.subtask
-
-      if (callerIsWaiting) {
-        newCallerState = {
-          ...newCallerState,
+      // let process know that subprocess finished
+      // if in correct state
+      if (callerInCorrectState) {
+        return {
+          ...state,
+          subProcesses,
           status: 'running',
           currentInput: {
             finished: {
-              id: state.id,
-              status: state.status,
-              output: state.output,
+              id: pendingMessage.source,
+              status: pendingMessage.status,
+              output: pendingMessage.output,
             },
           },
         }
       }
+    }
 
-      const result = await this.db.updateProcess(newCallerState)
-
-      if (callerIsWaiting) {
-        this.queue.add({ id: result.id, time: result.nextDeployTime })
-      }
+    return {
+      ...state,
+      subProcesses,
     }
   }
 
-  private dealWithSubProcesses = async (state: ProcessStateType): Promise<ProcessStateType> => {
+  private updateCaller = async (state: ProcessStateType) => {
+    if (state.caller?.id) {
+      this.queue.addPendingMessage({
+        source: state.id,
+        target: state.caller.id,
+        task: state.caller.task,
+        subtask: state.caller.subtask,
+        status: state.status as ProcessStatusType,
+        output: state.output,
+      })
+    }
+  }
+
+  private startSubprocessesIfNew = async (state: ProcessStateType): Promise<ProcessStateType> => {
     const newSubprocesses = state.subProcesses.filter((sp) => sp.status === 'init')
     let newState = state
 
@@ -138,20 +152,24 @@ class BrokerController {
   }
 
   private processWork = async (processId: string) => {
-    const state = await this.db.getProcess(processId)
+    let state = await this.db.getProcess(processId)
 
-    const newState: ProcessStateType = {
+    state = this.dealWithPendingMessages(state)
+
+    state = {
       ...state,
       currentTask: state.nextTask,
       currentSubtask: state.nextSubtask,
       nextTask: null,
       nextSubtask: null,
       nextDeployTime: null,
-      active: true,
     }
 
-    const result = await this.db.updateProcess(newState)
-    this.worker.sendMakeStep(result)
+    state = await this.db.updateProcess(state)
+    console.log(state)
+    if (state.status === 'running') {
+      this.worker.sendMakeStep(state)
+    }
   }
 
   private startProcess = async (input: SubProcessType, caller: ProcessStateType) => {
@@ -173,7 +191,6 @@ class BrokerController {
       output: null,
       error: null,
       tags: [],
-      active: false,
       caller: {
         id: caller.id,
         task: caller.currentTask,

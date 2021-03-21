@@ -225,9 +225,6 @@ export class Process extends jspb.Message {
   setTagsList(value: Array<string>): void;
   addTags(value: string, index?: number): string;
 
-  getActive(): boolean;
-  setActive(value: boolean): void;
-
   hasCaller(): boolean;
   clearCaller(): void;
   getCaller(): Caller | undefined;
@@ -267,7 +264,6 @@ export namespace Process {
     output: string,
     error?: ProcessError.AsObject,
     tagsList: Array<string>,
-    active: boolean,
     caller?: Caller.AsObject,
     subProcessesList: Array<SubProcess.AsObject>,
   }

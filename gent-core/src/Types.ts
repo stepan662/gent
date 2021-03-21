@@ -20,7 +20,6 @@ export type ProcessStateType<TInput = any> = {
   output: any
   error?: ProcessErrorType
   tags: string[]
-  active: boolean
   caller?: CallerType
   subProcesses: SubProcessType[]
 }

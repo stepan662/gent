@@ -7,7 +7,6 @@ export function processFromObject(i: ProcessStateType) {
   result.setId(i.id)
   result.setCreated(i.created)
   result.setType(i.type)
-  result.setActive(i.active)
   result.setVersion(i.version)
   result.setStatus(i.status)
   result.setCurrentTask(i.currentTask)
@@ -44,7 +43,6 @@ export function processToObject(i: Process): ProcessStateType {
     id: i.getId(),
     created: i.getCreated(),
     type: i.getType(),
-    active: i.getActive(),
     version: i.getVersion(),
     status: i.getStatus(),
     currentTask: i.getCurrentTask(),

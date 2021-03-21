@@ -7,8 +7,8 @@ import { useRouter } from 'next/router'
 
 import Stack from '@kiwicom/orbit-components/lib/Stack'
 import Heading from '@kiwicom/orbit-components/lib/Heading'
-import { ProcessStateType } from '../../../../gent-diagram/lib/types/ProcessState'
-import { Schema } from '../../../../gent-diagram/lib/types/ProcessSchema'
+import { ProcessStateType } from 'gent-diagram/lib/types/ProcessState'
+import { Schema } from 'gent-diagram/lib/types/ProcessSchema'
 
 const Container = styled.div`
   width: 1000px;
@@ -93,7 +93,7 @@ const Process = () => {
             state={state}
             subs={subs}
             onRequestSubprocess={addObservedIds}
-            allowedLevel={3}
+            allowedLevel={2}
           />
         </Stack>
       )}

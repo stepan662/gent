@@ -54,9 +54,8 @@ message Process {
   string output = 15;
   ProcessError error = 16;
   repeated string tags = 17;
-  bool active = 18;
-  Caller caller = 19;
-  repeated SubProcess sub_processes = 20;
+  Caller caller = 18;
+  repeated SubProcess sub_processes = 19;
 }
 
 message Processes {

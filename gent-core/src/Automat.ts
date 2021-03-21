@@ -36,7 +36,6 @@ class Automat {
       output: null,
       error: null,
       tags: [],
-      active: null,
       caller: null,
       subProcesses: [],
     }

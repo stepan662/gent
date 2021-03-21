@@ -1369,7 +1369,7 @@ proto.ProcessError.prototype.setStack = function(value) {
  * @private {!Array<number>}
  * @const
  */
-proto.Process.repeatedFields_ = [17,20];
+proto.Process.repeatedFields_ = [17,19];
 
 
 
@@ -1419,7 +1419,6 @@ proto.Process.toObject = function(includeInstance, msg) {
     output: jspb.Message.getFieldWithDefault(msg, 15, ""),
     error: (f = msg.getError()) && proto.ProcessError.toObject(includeInstance, f),
     tagsList: (f = jspb.Message.getRepeatedField(msg, 17)) == null ? undefined : f,
-    active: jspb.Message.getBooleanFieldWithDefault(msg, 18, false),
     caller: (f = msg.getCaller()) && proto.Caller.toObject(includeInstance, f),
     subProcessesList: jspb.Message.toObjectList(msg.getSubProcessesList(),
     proto.SubProcess.toObject, includeInstance)
@@ -1529,15 +1528,11 @@ proto.Process.deserializeBinaryFromReader = function(msg, reader) {
       msg.addTags(value);
       break;
     case 18:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setActive(value);
-      break;
-    case 19:
       var value = new proto.Caller;
       reader.readMessage(value,proto.Caller.deserializeBinaryFromReader);
       msg.setCaller(value);
       break;
-    case 20:
+    case 19:
       var value = new proto.SubProcess;
       reader.readMessage(value,proto.SubProcess.deserializeBinaryFromReader);
       msg.addSubProcesses(value);
@@ -1691,17 +1686,10 @@ proto.Process.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getActive();
-  if (f) {
-    writer.writeBool(
-      18,
-      f
-    );
-  }
   f = message.getCaller();
   if (f != null) {
     writer.writeMessage(
-      19,
+      18,
       f,
       proto.Caller.serializeBinaryToWriter
     );
@@ -1709,7 +1697,7 @@ proto.Process.serializeBinaryToWriter = function(message, writer) {
   f = message.getSubProcessesList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      20,
+      19,
       f,
       proto.SubProcess.serializeBinaryToWriter
     );
@@ -2062,30 +2050,12 @@ proto.Process.prototype.clearTagsList = function() {
 
 
 /**
- * optional bool active = 18;
- * @return {boolean}
- */
-proto.Process.prototype.getActive = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 18, false));
-};
-
-
-/**
- * @param {boolean} value
- * @return {!proto.Process} returns this
- */
-proto.Process.prototype.setActive = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 18, value);
-};
-
-
-/**
- * optional Caller caller = 19;
+ * optional Caller caller = 18;
  * @return {?proto.Caller}
  */
 proto.Process.prototype.getCaller = function() {
   return /** @type{?proto.Caller} */ (
-    jspb.Message.getWrapperField(this, proto.Caller, 19));
+    jspb.Message.getWrapperField(this, proto.Caller, 18));
 };
 
 
@@ -2094,7 +2064,7 @@ proto.Process.prototype.getCaller = function() {
  * @return {!proto.Process} returns this
 */
 proto.Process.prototype.setCaller = function(value) {
-  return jspb.Message.setWrapperField(this, 19, value);
+  return jspb.Message.setWrapperField(this, 18, value);
 };
 
 
@@ -2112,17 +2082,17 @@ proto.Process.prototype.clearCaller = function() {
  * @return {boolean}
  */
 proto.Process.prototype.hasCaller = function() {
-  return jspb.Message.getField(this, 19) != null;
+  return jspb.Message.getField(this, 18) != null;
 };
 
 
 /**
- * repeated SubProcess sub_processes = 20;
+ * repeated SubProcess sub_processes = 19;
  * @return {!Array<!proto.SubProcess>}
  */
 proto.Process.prototype.getSubProcessesList = function() {
   return /** @type{!Array<!proto.SubProcess>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.SubProcess, 20));
+    jspb.Message.getRepeatedWrapperField(this, proto.SubProcess, 19));
 };
 
 
@@ -2131,7 +2101,7 @@ proto.Process.prototype.getSubProcessesList = function() {
  * @return {!proto.Process} returns this
 */
 proto.Process.prototype.setSubProcessesList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 20, value);
+  return jspb.Message.setRepeatedWrapperField(this, 19, value);
 };
 
 
@@ -2141,7 +2111,7 @@ proto.Process.prototype.setSubProcessesList = function(value) {
  * @return {!proto.SubProcess}
  */
 proto.Process.prototype.addSubProcesses = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 20, opt_value, proto.SubProcess, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 19, opt_value, proto.SubProcess, opt_index);
 };
 
 

@@ -1,58 +1,42 @@
-import Process, { deserializeProcess } from './db/models/Process'
+import Process, { deserializeProcess, serializeProcess } from './db/models/Process'
 import { ProcessStateType } from './Types'
+import { db } from './db/connection'
 
 class BrokerDb {
   createProcess = async (i: ProcessStateType): Promise<ProcessStateType> => {
     const result = await Process.create({
+      ...serializeProcess(i),
       created: i.created && new Date(i.created),
-      type: i.type,
-      version: i.version,
-      status: i.status,
-      currentTask: i.currentTask,
-      currentSubtask: i.currentSubtask,
-      currentInput: i.currentInput,
-      nextDeployTime: i.nextDeployTime ?? new Date(i.nextDeployTime),
-      nextTask: i.nextTask,
-      nextSubtask: i.nextSubtask,
-      taskState: i.taskState,
-      state: i.state,
-      input: i.input,
-      output: i.output,
-      error: i.error,
-      tags: i.tags,
-      active: i.active,
-      caller: i.caller,
-      subProcesses: i.subProcesses,
     })
     return deserializeProcess(result)
   }
 
   updateProcess = async (i: ProcessStateType) => {
     const [_, result] = await Process.update(
-      {
-        created: i.created && new Date(i.created),
-        type: i.type,
-        version: i.version,
-        status: i.status,
-        currentTask: i.currentTask,
-        currentSubtask: i.currentSubtask,
-        currentInput: i.currentInput,
-        nextDeployTime: i.nextDeployTime ?? new Date(i.nextDeployTime),
-        nextTask: i.nextTask,
-        nextSubtask: i.nextSubtask,
-        taskState: i.taskState,
-        state: i.state,
-        input: i.input,
-        output: i.output,
-        error: i.error,
-        tags: i.tags,
-        active: i.active,
-        caller: i.caller,
-        subProcesses: i.subProcesses,
-      },
+      { ...serializeProcess(i) },
       { where: { id: Number(i.id) }, returning: true },
     )
     return deserializeProcess(result[0])
+  }
+
+  updateProcessInTransaction = async (
+    processId: string,
+    callback: (state: ProcessStateType) => Promise<ProcessStateType | null>,
+  ): Promise<[boolean, ProcessStateType]> => {
+    return db.transaction(async (transaction) => {
+      const rawState = await Process.findByPk(Number(processId), { transaction })
+      const state = deserializeProcess(rawState)
+      const result = await callback(state)
+      if (result) {
+        const [_, updated] = await Process.update(serializeProcess(result), {
+          where: { id: Number(processId) },
+          returning: true,
+        })
+        return [true, deserializeProcess(updated[0])]
+      } else {
+        return [false, state]
+      }
+    })
   }
 
   getProcess = async (processId: string) => {

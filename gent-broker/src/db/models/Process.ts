@@ -19,7 +19,6 @@ const Process = db.define('Process', {
   output: DataTypes.JSONB,
   error: DataTypes.JSONB,
   tags: DataTypes.ARRAY(DataTypes.STRING),
-  active: DataTypes.BOOLEAN,
   caller: DataTypes.JSONB,
   subProcesses: DataTypes.ARRAY(DataTypes.JSONB),
 })
@@ -43,7 +42,29 @@ export function deserializeProcess(i: any): ProcessStateType {
     output: i.output,
     error: i.error,
     tags: i.tags,
-    active: i.active,
+    caller: i.caller,
+    subProcesses: i.subProcesses,
+  }
+}
+
+export function serializeProcess(i: ProcessStateType): any {
+  return {
+    created: i.created && new Date(i.created),
+    type: i.type,
+    version: i.version,
+    status: i.status,
+    currentTask: i.currentTask,
+    currentSubtask: i.currentSubtask,
+    currentInput: i.currentInput,
+    nextDeployTime: i.nextDeployTime ?? new Date(i.nextDeployTime),
+    nextTask: i.nextTask,
+    nextSubtask: i.nextSubtask,
+    taskState: i.taskState,
+    state: i.state,
+    input: i.input,
+    output: i.output,
+    error: i.error,
+    tags: i.tags,
     caller: i.caller,
     subProcesses: i.subProcesses,
   }
