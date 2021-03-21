@@ -22,14 +22,14 @@ export class SubtaskResult<T = any> implements SubtaskResultType<T> {
   returnData?: T
 
   constructor(options: SubtaskResultType<T>) {
-    this.taskState = options.taskState
-    this.state = options.state
-    this.nextTask = options.nextTask
-    this.nextSubtask = options.nextSubtask
-    this.delay = options.delay
-    this.pause = options.pause
-    this.subProcesses = options.subProcesses
-    this.returnData = options.returnData
+    if (options.taskState !== undefined) this.taskState = options.taskState
+    if (options.state !== undefined) this.state = options.state
+    if (options.nextTask !== undefined) this.nextTask = options.nextTask
+    if (options.nextSubtask !== undefined) this.nextSubtask = options.nextSubtask
+    if (options.delay !== undefined) this.delay = options.delay
+    if (options.pause !== undefined) this.pause = options.pause
+    if (options.subProcesses !== undefined) this.subProcesses = options.subProcesses
+    if (options.returnData !== undefined) this.returnData = options.returnData
   }
 }
 

@@ -26,11 +26,8 @@ const [start, task] = b.connect(
         input: null,
       },
     ],
-    onStart: (tasks) => {
-      console.log('onStart', tasks)
-    },
-    onFinish: (task) => {
-      console.log('onFinish', task)
+    onStart: () => {
+      console.log('onStart')
     },
   }),
 )

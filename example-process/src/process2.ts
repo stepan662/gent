@@ -1,6 +1,7 @@
 import b from 'gent-core/lib/NodeBuilder'
 import * as n from 'gent-core/lib/Node'
 import Process from 'gent-core/lib/Process'
+import { SubtaskResult } from 'gent-core/lib/Subtask'
 
 const [start, task] = b.connect(
   // start event
@@ -25,12 +26,21 @@ const [start, task] = b.connect(
         version: 'test',
         input: null,
       },
+      {
+        type: 'process1',
+        version: 'test',
+        input: null,
+      },
+      {
+        type: 'process1',
+        version: 'test',
+        input: null,
+      },
     ],
-    onStart: (tasks) => {
-      console.log('onStart', tasks)
-    },
-    onFinish: (task) => {
-      console.log('onFinish', task)
+    onFinish: () => {
+      return new SubtaskResult({
+        pause: false,
+      })
     },
   }),
 )

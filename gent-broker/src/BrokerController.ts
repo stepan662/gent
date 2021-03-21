@@ -156,17 +156,17 @@ class BrokerController {
 
     state = this.dealWithPendingMessages(state)
 
-    state = {
-      ...state,
-      currentTask: state.nextTask,
-      currentSubtask: state.nextSubtask,
-      nextTask: null,
-      nextSubtask: null,
-      nextDeployTime: null,
+    if (state.status === 'running') {
+      state = {
+        ...state,
+        currentTask: state.nextTask,
+        currentSubtask: state.nextSubtask,
+        nextTask: null,
+        nextSubtask: null,
+        nextDeployTime: null,
+      }
     }
-
     state = await this.db.updateProcess(state)
-    console.log(state)
     if (state.status === 'running') {
       this.worker.sendMakeStep(state)
     }

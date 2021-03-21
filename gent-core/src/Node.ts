@@ -96,14 +96,15 @@ export const subProcess = (props?: SubProcessInput): SubprocessType => {
         const result = onStart
           ? wrapResult(await onStart(currentInput.started, subtaskProps))
           : null
+
         return new SubtaskResult({
+          nextSubtask: result?.pause ? null : currentSubtask,
+          pause: true,
           ...result,
           taskState: {
             ...result?.taskState,
             _subProcesses: currentInput.started,
           },
-          nextSubtask: currentSubtask,
-          pause: true,
         })
       } else if (currentInput?.finished) {
         const subProcesses = taskState._subProcesses.map((sp) =>
@@ -117,13 +118,13 @@ export const subProcess = (props?: SubProcessInput): SubprocessType => {
 
         if (!allFinished) {
           return new SubtaskResult({
+            nextSubtask: result?.pause ? null : currentSubtask,
+            pause: true,
             ...result,
             taskState: {
               ...result?.taskState,
               _subProcesses: subProcesses,
             },
-            nextSubtask: currentSubtask,
-            pause: true,
           })
         } else {
           return new SubtaskResult({
